@@ -43,13 +43,14 @@ namespace Zenseless.Spatial
 		public ReadOnlyCollection<CellType> Cells => Array.AsReadOnly(_cells);
 
 		/// <summary>
-		/// Copy the data given by an array starting at a given start index into the grid
+		/// Copy the data given by an array starting at a given start index into the grid. No grid resize will take place. Uses <seealso cref="Array.Copy(Array, int, Array, int, int)"/>
 		/// </summary>
 		/// <param name="data">source data to be copied</param>
+		/// <param name="length">length of the data to copy</param>
 		/// <param name="dataStartIndex">start index inside the source data to start copying</param>
-		public void CopyFrom(CellType[] data, int dataStartIndex = 0)
+		public void CopyFrom(CellType[] data, int length, int dataStartIndex = 0)
 		{
-			Array.Copy(data, dataStartIndex, _cells, 0, _cells.Length); // will throw exception if data is too short
+			Array.Copy(data, dataStartIndex, _cells, 0, length); // will throw exception if grid is too small
 		}
 
 		/// <summary>
@@ -61,12 +62,12 @@ namespace Zenseless.Spatial
 		/// <summary>
 		/// Number of columns in the grid.
 		/// </summary>
-		public int Columns { get; set; }
+		public int Columns { get; }
 
 		/// <summary>
 		/// Number of rows in the grid.
 		/// </summary>
-		public int Rows { get; set; }
+		public int Rows { get; }
 
 		/// <summary>
 		/// Returns an enumerator that iterates through the collection.
