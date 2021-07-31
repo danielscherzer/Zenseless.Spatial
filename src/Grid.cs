@@ -71,24 +71,6 @@ namespace Zenseless.Spatial
 		public int Rows { get; }
 
 		/// <summary>
-		/// Returns an enumerator that iterates through the collection.
-		/// </summary>
-		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
-		public IEnumerator<CellType> GetEnumerator()
-		{
-			foreach (var cell in _cells)
-			{
-				yield return cell;
-			}
-		}
-
-		/// <summary>
-		/// Returns an enumerator that iterates through the collection.
-		/// </summary>
-		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-		/// <summary>
 		/// Is the given column and row number contained in the grid
 		/// </summary>
 		/// <param name="column">address of the cell</param>
