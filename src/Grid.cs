@@ -9,6 +9,7 @@ namespace Zenseless.Spatial
 	/// A two dimensional grid, internally represented by an array.
 	/// </summary>
 	/// <typeparam name="CellType">Data type of each cell</typeparam>
+	[Serializable]
 	public class Grid<CellType> : IReadOnlyGrid<CellType>
 	{
 		/// <summary>
