@@ -73,18 +73,27 @@ namespace Zenseless.Spatial.Tests
 			Assert.IsTrue(grid.AsReadOnly.Skip(10).All(value => 45 == value));
 		}
 
-		//[TestMethod()]
-		//public void SerializeAndDeserializeTest()
-		//{
-		//	Grid<int> grid = new(5, 3);
-		//	grid.Fill(78);
-		//	var options = new JsonSerializerOptions
-		//	{
-		//		IncludeFields = true,
-		//	};
+		[TestMethod()]
+		public void SerializeAndDeserializeTest()
+		{
+			Grid<int> grid = new(5, 3);
+			grid.Fill(78);
+			string jsonString = JsonSerializer.Serialize(grid);
+			var grid2 = GridSerialization.Deserialize<int>(jsonString);
+			Assert.IsTrue(grid.Equals(grid2));
+		}
 
-		//	string jsonString = JsonSerializer.Serialize(grid, options);
-		//	var grid2 = JsonSerializer.Deserialize<Grid<int>>(jsonString, options);
-		//}
+		[TestMethod()]
+		public void EqualsTest()
+		{
+			Assert.IsTrue(new Grid<int>(5, 3).Equals(new Grid<int>(5, 3)));
+			Assert.IsFalse(new Grid<int>(5, 3).Equals(new Grid<int>(3, 5)));
+			Grid<int> grid = new(5, 3);
+			grid.Fill(78);
+			Grid<int> grid2 = new(5, 3);
+			grid2.Fill(78);
+			Assert.IsTrue(grid.Equals(grid2));
+			grid[grid.Columns - 1, grid.Rows - 1] = 4;
+		}
 	}
 }

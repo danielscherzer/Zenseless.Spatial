@@ -7,7 +7,7 @@ namespace Zenseless.Spatial
 	/// A two dimensional grid, internally represented by an array.
 	/// </summary>
 	/// <typeparam name="CellType">Data type of each cell</typeparam>
-	public class Grid<CellType> : IReadOnlyGrid<CellType>
+	public class Grid<CellType> : IReadOnlyGrid<CellType>, IEquatable<Grid<CellType>>
 	{
 		/// <summary>
 		/// Create an instance of a grid with the given dimensions
@@ -74,6 +74,54 @@ namespace Zenseless.Spatial
 		/// <param name="row">address of the cell</param>
 		/// <returns><c>true</c> if the column and row combination is contained in the grid, <c>false</c> otherwise.</returns>
 		public bool Valid(int column, int row) => 0 <= column && column < Columns && 0 <= row && row < Rows;
+
+		/// <summary>
+		/// Determines whether the specified Grid instances are considered equal.
+		/// </summary>
+		/// <param name="other">The second object to compare.</param>
+		/// <returns><c>true</c> if the objects are considered equal; otherwise, <c>false</c>. If both are null, the method returns true.</returns>
+		public override bool Equals(object? other)
+		{
+			if (ReferenceEquals(this, other)) return true;
+			if (other?.GetType() != GetType()) return false;
+			return Equals(other as Grid<CellType>);
+		}
+
+		/// <summary>
+		/// Determines whether the specified Grid instances are considered equal.
+		/// </summary>
+		/// <param name="other">The second object to compare.</param>
+		/// <returns><c>true</c> if the objects are considered equal; otherwise, <c>false</c>. If both are null, the method returns true.</returns>
+		public bool Equals(Grid<CellType>? other)
+		{
+			if (other is null) return false;
+			if (Columns != other.Columns || Rows != other.Rows) return false;
+			ReadOnlyCollection<CellType> self = AsReadOnly;
+			ReadOnlyCollection<CellType> o = other.AsReadOnly;
+			for(int i = 0; i < self.Count; ++i)
+			{
+				if(!Equals(self[i], o[i])) return false;
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// Returns the hash code for this instance.
+		/// </summary>
+		/// <returns>A 32-bit signed integer hash code.</returns>
+		public override int GetHashCode()
+		{
+			return Columns.GetHashCode() ^ Rows.GetHashCode() ^ _cells.GetHashCode();
+		}
+
+		/// <summary>
+		/// Returns a string that represents the current object.
+		/// </summary>
+		/// <returns>A string that represents the current object.</returns>
+		public override string? ToString()
+		{
+			return $"Columns:{Columns} Rows:{Rows} Cells:[{_cells}]";
+		}
 
 		private readonly CellType[] _cells;
 	}
