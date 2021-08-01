@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
+using System.Text.Json;
 
 namespace Zenseless.Spatial.Tests
 {
@@ -18,10 +19,10 @@ namespace Zenseless.Spatial.Tests
 		public void GridSizeTest()
 		{
 			Grid<int> grid = new(13, 17);
-			Assert.AreEqual(grid.Cells.Count, 13 * 17);
-			Assert.AreEqual(grid.Cells.Count, grid.Columns * grid.Rows);
+			Assert.AreEqual(grid.AsReadOnly.Count, 13 * 17);
+			Assert.AreEqual(grid.AsReadOnly.Count, grid.Columns * grid.Rows);
 			grid[grid.Columns - 1, grid.Rows - 1] = 4;
-			Assert.AreEqual(4, grid.Cells.Last());
+			Assert.AreEqual(4, grid.AsReadOnly.Last());
 		}
 
 		[TestMethod()]
@@ -41,7 +42,7 @@ namespace Zenseless.Spatial.Tests
 		{
 			Grid<int> grid = new(127, 543);
 			grid.Fill(78);
-			Assert.IsTrue(grid.Cells.All(value => 78 == value));
+			Assert.IsTrue(grid.AsReadOnly.All(value => 78 == value));
 		}
 
 		[TestMethod()]
@@ -50,7 +51,7 @@ namespace Zenseless.Spatial.Tests
 			Grid<int> grid = new(543, 127);
 			int count = 0;
 			grid.Fill(78);
-			foreach (var cell in grid.Cells)
+			foreach (var cell in grid.AsReadOnly)
 			{
 				++count;
 				Assert.AreEqual(78, cell);
@@ -62,14 +63,28 @@ namespace Zenseless.Spatial.Tests
 		public void CopyFromTest()
 		{
 			Grid<int> grid = new(543, 127);
-			var arr = Enumerable.Repeat(45, grid.Cells.Count * 10).ToArray();
-			grid.CopyFrom(arr, grid.Cells.Count);
+			var arr = Enumerable.Repeat(45, grid.AsReadOnly.Count * 10).ToArray();
+			grid.CopyFrom(arr, grid.AsReadOnly.Count);
 			Assert.ThrowsException<ArgumentException>(() => grid.CopyFrom(arr, arr.Length));
-			Assert.IsTrue(grid.Cells.All(value => 45 == value));
+			Assert.IsTrue(grid.AsReadOnly.All(value => 45 == value));
 			var arr2 = Enumerable.Repeat(67, 10).ToArray();
 			grid.CopyFrom(arr2, arr2.Length);
-			Assert.IsTrue(grid.Cells.Take(10).All(value => 67 == value));
-			Assert.IsTrue(grid.Cells.Skip(10).All(value => 45 == value));
+			Assert.IsTrue(grid.AsReadOnly.Take(10).All(value => 67 == value));
+			Assert.IsTrue(grid.AsReadOnly.Skip(10).All(value => 45 == value));
 		}
+
+		//[TestMethod()]
+		//public void SerializeAndDeserializeTest()
+		//{
+		//	Grid<int> grid = new(5, 3);
+		//	grid.Fill(78);
+		//	var options = new JsonSerializerOptions
+		//	{
+		//		IncludeFields = true,
+		//	};
+
+		//	string jsonString = JsonSerializer.Serialize(grid, options);
+		//	var grid2 = JsonSerializer.Deserialize<Grid<int>>(jsonString, options);
+		//}
 	}
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Zenseless.Spatial
@@ -9,7 +7,6 @@ namespace Zenseless.Spatial
 	/// A two dimensional grid, internally represented by an array.
 	/// </summary>
 	/// <typeparam name="CellType">Data type of each cell</typeparam>
-	[Serializable]
 	public class Grid<CellType> : IReadOnlyGrid<CellType>
 	{
 		/// <summary>
@@ -41,7 +38,7 @@ namespace Zenseless.Spatial
 		/// <summary>
 		/// A <seealso cref="ReadOnlyCollection{T}"/> of cells.
 		/// </summary>
-		public ReadOnlyCollection<CellType> Cells => Array.AsReadOnly(_cells);
+		public ReadOnlyCollection<CellType> AsReadOnly => Array.AsReadOnly(_cells);
 
 		/// <summary>
 		/// Copy the data given by an array starting at a given start index into the grid. No grid resize will take place. Uses <seealso cref="Array.Copy(Array, int, Array, int, int)"/>

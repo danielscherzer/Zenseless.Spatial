@@ -19,7 +19,7 @@ namespace Zenseless.Spatial
 		/// <summary>
 		/// A <seealso cref="ReadOnlyCollection{T}"/> of cells.
 		/// </summary>
-		ReadOnlyCollection<CellType> Cells { get; }
+		ReadOnlyCollection<CellType> AsReadOnly { get; }
 
 		/// <summary>
 		/// Number of columns in the grid.
