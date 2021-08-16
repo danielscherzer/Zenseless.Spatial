@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Zenseless.Patterns;
 
 namespace Example
 {
@@ -19,8 +18,6 @@ namespace Example
 			}
 		}
 
-		public event EventHandler<IReadOnlyList<GameObject>>? AfterUpdate;
-
 		public IReadOnlyList<GameObject> GameObjects => _gameObjects;
 
 		public void Update(float elapsedTime)
@@ -29,7 +26,6 @@ namespace Example
 			{
 				gameObject.Update(elapsedTime);
 			}
-			AfterUpdate?.Invoke(this, GameObjects);
 		}
 
 		internal void Add(GameObject gameObject)
