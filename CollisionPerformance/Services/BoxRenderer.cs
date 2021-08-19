@@ -2,6 +2,7 @@
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using Zenseless.Patterns;
 
 namespace Example.Services
 {
@@ -18,12 +19,12 @@ namespace Example.Services
 		{
 			try
 			{
-				var rects = _materialRects[materialHandle.Id];
+				var rects = _materialRects[materialHandle];
 				rects.Add(rectangle);
 			}
 			catch (ArgumentOutOfRangeException)
 			{
-				throw new ApplicationException($"Invalid material id:{materialHandle.Id}.");
+				throw new ApplicationException($"Invalid material id:{materialHandle}.");
 			}
 		}
 
