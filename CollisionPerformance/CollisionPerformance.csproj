@@ -12,7 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTK" Version="4.6.4" />
-    <PackageReference Include="Zenseless.Patterns" Version="0.6.11" />
+    <PackageReference Include="Zenseless.OpenTK" Version="0.1.30" />
   </ItemGroup>
 </Project>

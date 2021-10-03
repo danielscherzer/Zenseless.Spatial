@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Zenseless.OpenTK;
 
 namespace Example.Spatial
 {
@@ -38,7 +39,7 @@ namespace Example.Spatial
 
 		public IEnumerable<DataType> Query(Box2 area)
 		{
-			if (area.Intersects(Bounds))
+			if (Box2Extensions.Overlaps(area, Bounds))
 			{
 				foreach (var item in Item)
 				{

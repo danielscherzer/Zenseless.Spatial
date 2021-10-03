@@ -1,6 +1,5 @@
 ﻿using Example;
 using Example.Services;
-using Example.Spatial;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Zenseless.OpenTK;
 
 GameWindow window = new(GameWindowSettings.Default, new NativeWindowSettings { Profile = ContextProfile.Compatability }); // window with immediate mode rendering enabled
 window.VSync = VSyncMode.On;
@@ -21,60 +21,50 @@ var renderer = new BoxRenderer();
 window.RenderFrame += _ => renderer.Draw();
 window.RenderFrame += _ => window.SwapBuffers();
 
-
-Scene scene = new(1000);
-window.UpdateFrame += args => scene.Update((float)args.Time);
+List<GameObject> gameObjects = Scene.CreateObjects(1000);
+window.UpdateFrame += args =>
+{
+	var deltaTime = (float)args.Time;
+	gameObjects.ForEach(gameObject => gameObject.Update(deltaTime));
+};
 
 var materialGameObject = renderer.Add(new Material(Color4.White, true));
 void RenderGameObjects()
 {
-	foreach (var gameObject in scene.GameObjects)
+	foreach (var gameObject in gameObjects)
 	{
 		renderer.Enqueue(gameObject.Bounds(), materialGameObject);
 	}
 }
 window.UpdateFrame += _ => RenderGameObjects();
 
-HashSet<GameObject> CollissionBruteForce(IReadOnlyList<GameObject> gameObjects)
-{
-	HashSet<GameObject> colliding = new();
-	for (int i = 0; i < gameObjects.Count - 1; ++i)
-	{
-		for (int j = i + 1; j < gameObjects.Count; ++j)
-		{
-			var a = gameObjects[i];
-			var b = gameObjects[j];
-			if (a.Bounds().Intersects(b.Bounds()))
-			{
-				colliding.Add(a);
-				colliding.Add(b);
-			}
-		}
-	}
-	return colliding;
-}
-
 QuadtreeCollission quadTreeCollission = new(renderer);
+Func<HashSet<GameObject>> qtColl = () => quadTreeCollission.Check(gameObjects);
+Func<HashSet<GameObject>> bfColl = () => Scene.CollissionBruteForce(gameObjects);
 
-Func<HashSet<GameObject>> qtColl = () => quadTreeCollission.Check(scene.GameObjects);
-Func<HashSet<GameObject>> bfColl = () => CollissionBruteForce(scene.GameObjects);
-
-Func<HashSet<GameObject>> currentCollisionAlgo = qtColl;
-int iterationCount = 0;
-window.UpdateFrame += _ => 
+Func<HashSet<GameObject>> currentCollisionAlgo = bfColl;
+void ToggleAlgo()
 {
-	if(60 < iterationCount)
+	if(currentCollisionAlgo == bfColl)
 	{
-		currentCollisionAlgo = bfColl;
-		window.Title = "Brute Force Collision...";
+		window.Title = "Quadtree Collision";
+		currentCollisionAlgo = qtColl;
 	}
 	else
 	{
-		window.Title = "Quadtree Collision...";
-		currentCollisionAlgo = qtColl;
+		currentCollisionAlgo = bfColl;
+		window.Title = "Brute Force Collision";
 	}
-	if(200 < iterationCount) iterationCount = 0;
-	++iterationCount;
+}
+ToggleAlgo();
+Stopwatch time = Stopwatch.StartNew();
+window.UpdateFrame += _ => 
+{
+	if(time.Elapsed > TimeSpan.FromSeconds(2))
+	{
+		ToggleAlgo();
+		time = Stopwatch.StartNew();
+	}
 };
 
 var materialCollission = renderer.Add(new Material(Color4.Red, false));
@@ -97,33 +87,14 @@ void SetMousePoint()
 {
 	var m = window.MouseState;
 	{
-		var p = viewport.ToNDC(m.Position);
+		var p = m.Position.Transform(viewport.InvViewportMatrix);
 		var radius = new Vector2(0.01f);
 		var area = new Box2(p - radius, p + radius);
 		// only insert if no other point is nearby
-		if(!quadTreeCollission.QuadTree.Query(area).Any()) scene.Add(new GameObject(p));
+		if(!quadTreeCollission.QuadTree.Query(area).Any()) gameObjects.Add(new GameObject(p));
 	}
 }
 
 window.Run();
 
-//void Iterate(Action work)
-//{
-//	if (!window.Exists) return;
-//	for (int i = 0; i < 1000; ++i)
-//	{
-//		work();
-//		window.SwapBuffers();
-//		window.ProcessEvents();
-//		if(!window.Exists) break;
-//	}
-//}
-
-//do
-//{
-//	window.Title = "Quadtree Collision...";
-//	Iterate();
-//	window.Title = "Brute Force Collision...";
-//	Iterate();
-//} while (window.Exists);
 
