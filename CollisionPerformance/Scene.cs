@@ -1,6 +1,8 @@
-﻿using System;
+﻿using OpenTK.Mathematics;
+using System;
 using System.Collections.Generic;
 using Zenseless.OpenTK;
+using Zenseless.Patterns;
 
 namespace Example
 {
@@ -31,9 +33,9 @@ namespace Example
 			List<GameObject> gameObjects = new();
 			for (int i = 0; i < count; ++i)
 			{
-				var x = random.Next(-1f, 1f);
-				var y = random.Next(-1f, 1f);
-				gameObjects.Add(new GameObject(x, y) { Velocity = 0.01f * random.Vec2() });
+				var x = random.NextFloat(-1f, 1f);
+				var y = random.NextFloat(-1f, 1f);
+				gameObjects.Add(new GameObject(x, y) { Velocity = new Vector2(random.NextFloat(-0.01f, 0.01f), random.NextFloat(-0.01f, 0.01f)) });
 			}
 			return gameObjects;
 		}
