@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Zenseless.Spatial;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.Text.Json;
@@ -19,10 +20,10 @@ namespace Zenseless.Spatial.Tests
 		public void GridSizeTest()
 		{
 			Grid<int> grid = new(13, 17);
-			Assert.AreEqual(grid.AsReadOnly.Count, 13 * 17);
-			Assert.AreEqual(grid.AsReadOnly.Count, grid.Columns * grid.Rows);
+			Assert.AreEqual(grid.AsReadOnly().Count, 13 * 17);
+			Assert.AreEqual(grid.AsReadOnly().Count, grid.Columns * grid.Rows);
 			grid[grid.Columns - 1, grid.Rows - 1] = 4;
-			Assert.AreEqual(4, grid.AsReadOnly.Last());
+			Assert.AreEqual(4, grid.AsReadOnly().Last());
 		}
 
 		[TestMethod()]
@@ -42,7 +43,7 @@ namespace Zenseless.Spatial.Tests
 		{
 			Grid<int> grid = new(127, 543);
 			grid.Fill(78);
-			Assert.IsTrue(grid.AsReadOnly.All(value => 78 == value));
+			Assert.IsTrue(grid.AsReadOnly().All(value => 78 == value));
 		}
 
 		[TestMethod()]
@@ -51,7 +52,7 @@ namespace Zenseless.Spatial.Tests
 			Grid<int> grid = new(543, 127);
 			int count = 0;
 			grid.Fill(78);
-			foreach (var cell in grid.AsReadOnly)
+			foreach (var cell in grid.AsReadOnly())
 			{
 				++count;
 				Assert.AreEqual(78, cell);
@@ -60,17 +61,29 @@ namespace Zenseless.Spatial.Tests
 		}
 
 		[TestMethod()]
+		public void CellsTest()
+		{
+			Grid<int> grid = new(2, 3);
+			grid.Cells = new int[] { 1, 2, 3, 4, 5, 6 };
+			for(int i = 0; i < grid.Cells.Length; ++i)
+			{
+				Assert.AreEqual(i + 1, grid.Cells[i]);
+			}
+			Assert.ThrowsException<ArgumentException>(() => grid.Cells = new int[] { 1, 2, 3 });
+		}
+
+		[TestMethod()]
 		public void CopyFromTest()
 		{
 			Grid<int> grid = new(543, 127);
-			var arr = Enumerable.Repeat(45, grid.AsReadOnly.Count * 10).ToArray();
-			grid.CopyFrom(arr, grid.AsReadOnly.Count);
+			var arr = Enumerable.Repeat(45, grid.AsReadOnly().Count * 10).ToArray();
+			grid.CopyFrom(arr, grid.AsReadOnly().Count);
 			Assert.ThrowsException<ArgumentException>(() => grid.CopyFrom(arr, arr.Length));
-			Assert.IsTrue(grid.AsReadOnly.All(value => 45 == value));
+			Assert.IsTrue(grid.AsReadOnly().All(value => 45 == value));
 			var arr2 = Enumerable.Repeat(67, 10).ToArray();
 			grid.CopyFrom(arr2, arr2.Length);
-			Assert.IsTrue(grid.AsReadOnly.Take(10).All(value => 67 == value));
-			Assert.IsTrue(grid.AsReadOnly.Skip(10).All(value => 45 == value));
+			Assert.IsTrue(grid.AsReadOnly().Take(10).All(value => 67 == value));
+			Assert.IsTrue(grid.AsReadOnly().Skip(10).All(value => 45 == value));
 		}
 
 		[TestMethod()]
@@ -79,7 +92,7 @@ namespace Zenseless.Spatial.Tests
 			Grid<int> grid = new(5, 3);
 			grid.Fill(78);
 			string jsonString = JsonSerializer.Serialize(grid);
-			var grid2 = GridSerialization.Deserialize<int>(jsonString);
+			var grid2 = JsonSerializer.Deserialize<Grid<int>>(jsonString);
 			Assert.IsTrue(grid.Equals(grid2));
 		}
 

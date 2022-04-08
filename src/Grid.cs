@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
 
 namespace Zenseless.Spatial
 {
@@ -7,6 +9,8 @@ namespace Zenseless.Spatial
 	/// A two dimensional grid, internally represented by an array.
 	/// </summary>
 	/// <typeparam name="CellType">Data type of each cell</typeparam>
+	[DebuggerDisplay("Count = {Columns}x{Rows}")]
+	[Serializable]
 	public class Grid<CellType> : IReadOnlyGrid<CellType>, IEquatable<Grid<CellType>>
 	{
 		/// <summary>
@@ -38,7 +42,24 @@ namespace Zenseless.Spatial
 		/// <summary>
 		/// A <seealso cref="ReadOnlyCollection{T}"/> of cells.
 		/// </summary>
-		public ReadOnlyCollection<CellType> AsReadOnly => Array.AsReadOnly(_cells);
+		public ReadOnlyCollection<CellType> AsReadOnly()
+		{
+			Contract.Ensures(Contract.Result<ReadOnlyCollection<CellType>>() != null);
+			return Array.AsReadOnly(_cells);
+		}
+
+		/// <summary>
+		/// Return the array of cells for direct manipulation
+		/// </summary>
+		public CellType[] Cells
+		{
+			get => _cells;
+			set
+			{
+				if(value.Length != Columns * Rows) throw new ArgumentException("Given array does not match in size.");
+				_cells = value;
+			}
+		}
 
 		/// <summary>
 		/// Copy the data given by an array starting at a given start index into the grid. No grid resize will take place. Uses <seealso cref="Array.Copy(Array, int, Array, int, int)"/>
@@ -96,8 +117,8 @@ namespace Zenseless.Spatial
 		{
 			if (other is null) return false;
 			if (Columns != other.Columns || Rows != other.Rows) return false;
-			ReadOnlyCollection<CellType> self = AsReadOnly;
-			ReadOnlyCollection<CellType> o = other.AsReadOnly;
+			ReadOnlyCollection<CellType> self = AsReadOnly();
+			ReadOnlyCollection<CellType> o = other.AsReadOnly();
 			for(int i = 0; i < self.Count; ++i)
 			{
 				if(!Equals(self[i], o[i])) return false;
@@ -123,6 +144,6 @@ namespace Zenseless.Spatial
 			return $"Columns:{Columns} Rows:{Rows} Cells:[{_cells}]";
 		}
 
-		private readonly CellType[] _cells;
+		private CellType[] _cells;
 	}
 }
