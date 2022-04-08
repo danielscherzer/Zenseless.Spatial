@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Zenseless.Spatial
 {
@@ -6,7 +7,7 @@ namespace Zenseless.Spatial
 	/// Interface for a grid with read only access
 	/// </summary>
 	/// <typeparam name="CellType"></typeparam>
-	public interface IReadOnlyGrid<CellType>
+	public interface IReadOnlyGrid<CellType> //: IEnumerable<CellType>
 	{
 		/// <summary>
 		/// Returns a cell for a given column and row
@@ -15,6 +16,11 @@ namespace Zenseless.Spatial
 		/// <param name="row">address of the cell</param>
 		/// <returns>contents of a cell</returns>
 		CellType this[int column, int row] { get; }
+
+		/// <summary>
+		/// Allows to iterate over all cells.
+		/// </summary>
+		IEnumerable<CellType> Cells { get; }
 
 		/// <summary>
 		/// A <seealso cref="ReadOnlyCollection{T}"/> of cells.

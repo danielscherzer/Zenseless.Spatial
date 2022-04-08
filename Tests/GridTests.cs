@@ -97,6 +97,17 @@ namespace Zenseless.Spatial.Tests
 		}
 
 		[TestMethod()]
+		public void SerializeInterfaceAndDeserializeTest()
+		{
+			Grid<int> grid = new(5, 3);
+			grid.Fill(78);
+			IReadOnlyGrid<int> ro = grid;
+			string jsonString = JsonSerializer.Serialize(ro);
+			var grid2 = JsonSerializer.Deserialize<Grid<int>>(jsonString);
+			Assert.IsTrue(grid.Equals(grid2));
+		}
+
+		[TestMethod()]
 		public void EqualsTest()
 		{
 			Assert.IsTrue(new Grid<int>(5, 3).Equals(new Grid<int>(5, 3)));

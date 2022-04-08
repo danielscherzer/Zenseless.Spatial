@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -87,6 +88,8 @@ namespace Zenseless.Spatial
 		/// Number of rows in the grid.
 		/// </summary>
 		public int Rows { get; }
+		
+		IEnumerable<CellType> IReadOnlyGrid<CellType>.Cells => _cells;
 
 		/// <summary>
 		/// Is the given column and row number contained in the grid
