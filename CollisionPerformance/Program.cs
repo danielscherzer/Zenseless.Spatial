@@ -38,20 +38,20 @@ void RenderGameObjects()
 }
 window.RenderFrame += _ => RenderGameObjects();
 
-ICollissionAlgo algo = new BruteForceCollission();
+ICollisionAlgo algo = new BruteForceCollision();
 
 void ToggleAlgo()
 {
 	switch(algo)
 	{
-		case BruteForceCollission bf:
-			algo = new QuadtreeCollission(renderer);
+		case BruteForceCollision bf:
+			algo = new QuadtreeCollision(renderer);
 			break;
-		case QuadtreeCollission qt:
-			algo = new GridCollission();
+		case QuadtreeCollision qt:
+			algo = new GridCollision();
 			break;
-		case GridCollission g:
-			algo = new BruteForceCollission();
+		case GridCollision g:
+			algo = new BruteForceCollision();
 			break;
 	}
 }
@@ -69,7 +69,7 @@ window.UpdateFrame += args =>
 };
 
 var materialCollission = renderer.Add(new Material(Color4.Red, false));
-void CheckCollision(ICollissionAlgo algo)
+void CheckCollision(ICollisionAlgo algo)
 {
 	var stopwatch = Stopwatch.StartNew();
 

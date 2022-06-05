@@ -2,7 +2,7 @@
 
 namespace Example
 {
-	internal interface ICollissionAlgo
+	internal interface ICollisionAlgo
 	{
 		HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects);
 		void Render();

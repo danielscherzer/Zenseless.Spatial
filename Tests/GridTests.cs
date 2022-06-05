@@ -47,6 +47,25 @@ namespace Zenseless.Spatial.Tests
 		}
 
 		[TestMethod()]
+		public void ForeachTest()
+		{
+			Grid<int> grid = new(127, 543);
+			grid.ForEach(() => 78);
+			Assert.IsTrue(grid.AsReadOnly().All(value => 78 == value));
+		}
+
+		[TestMethod()]
+		public void Foreach2Test()
+		{
+			Grid<int> grid = new(127, 543);
+			grid.ForEach((col, row, value) => col + row * grid.Columns);
+			for(int i = 0; i < grid.Cells.Length; ++i)
+			{
+				Assert.AreEqual(grid.Cells[i], i);
+			}
+		}
+
+		[TestMethod()]
 		public void CellEnumerationTest()
 		{
 			Grid<int> grid = new(543, 127);

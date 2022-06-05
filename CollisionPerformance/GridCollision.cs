@@ -3,7 +3,7 @@ using Example.Spatial;
 using System.Collections.Generic;
 using Zenseless.Spatial;
 
-internal class GridCollission : ICollissionAlgo
+internal class GridCollision : ICollisionAlgo
 {
 	public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
 	{

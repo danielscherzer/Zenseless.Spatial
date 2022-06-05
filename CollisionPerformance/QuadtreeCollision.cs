@@ -7,9 +7,9 @@ using Zenseless.Patterns;
 
 namespace Example
 {
-	internal class QuadtreeCollission : ICollissionAlgo
+	internal class QuadtreeCollision : ICollisionAlgo
 	{
-		public QuadtreeCollission(BoxRenderer renderer)
+		public QuadtreeCollision(BoxRenderer renderer)
 		{
 			_materialQuadTree = renderer.Add(new Material(Color4.CornflowerBlue, false));
 			_quadTree = new Quadtree<GameObject>(new Box2(-1f, -1f, 1f, 1f));

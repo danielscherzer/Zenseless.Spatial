@@ -7,7 +7,7 @@ using Zenseless.Patterns;
 
 namespace Example
 {
-	internal class BruteForceCollission : ICollissionAlgo
+	internal class BruteForceCollision : ICollisionAlgo
 	{
 		public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
 		{
