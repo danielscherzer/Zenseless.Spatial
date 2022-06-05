@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 
 namespace Zenseless.Spatial
 {
@@ -36,8 +37,8 @@ namespace Zenseless.Spatial
 		/// <returns>contents of a cell</returns>
 		public CellType this[int column, int row]
 		{
-			get { return _cells[column + Columns * row]; }
-			set { _cells[column + Columns * row] = value; }
+			get { return _cells[ID(column, row)]; }
+			set { _cells[ID(column, row)] = value; }
 		}
 
 		/// <summary>
@@ -78,6 +79,52 @@ namespace Zenseless.Spatial
 		/// </summary>
 		/// <param name="value">value to fill with</param>
 		public void Fill(CellType value) => Array.Fill(_cells, value);
+
+		/// <summary>
+		/// Iterate over all cells and execute <paramref name="eval"/> for each
+		/// </summary>
+		/// <param name="eval">Functor that will be executed for each cell</param>
+		public void ForEach(Func<CellType> eval)
+		{
+			for (int row = 0; row < Rows; row++)
+			{
+				for (int col = 0; col < Columns; col++)
+				{
+					_cells[ID(col, row)] = eval();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Iterate over all cells and execute <paramref name="eval"/> for each
+		/// </summary>
+		/// <param name="eval">Functor that will be executed for each cell</param>
+		public void ForEach(Func<int, int, CellType> eval)
+		{
+			for (int row = 0; row < Rows; row++)
+			{
+				for(int col = 0; col < Columns; col++)
+				{
+					_cells[ID(col, row)] = eval(col, row);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Iterate over all cells and execute <paramref name="eval"/> for each
+		/// </summary>
+		/// <param name="eval">Functor that will be executed for each cell</param>
+		public void ForEach(Func<int, int, CellType, CellType> eval)
+		{
+			for (int row = 0; row < Rows; row++)
+			{
+				for (int col = 0; col < Columns; col++)
+				{
+					var id = ID(col, row);
+					_cells[id] = eval(col, row, _cells[id]);
+				}
+			}
+		}
 
 		/// <summary>
 		/// Number of columns in the grid.
@@ -148,5 +195,8 @@ namespace Zenseless.Spatial
 		}
 
 		private CellType[] _cells;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int ID(int column, int row) => column + Columns * row;
 	}
 }

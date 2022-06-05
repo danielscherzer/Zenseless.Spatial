@@ -14,4 +14,8 @@
   <ItemGroup>
     <PackageReference Include="Zenseless.OpenTK" Version="0.1.38" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\Zenseless.Spatial.csproj" />
+  </ItemGroup>
 </Project>

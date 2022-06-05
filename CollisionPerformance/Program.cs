@@ -28,7 +28,7 @@ window.UpdateFrame += args =>
 	gameObjects.ForEach(gameObject => gameObject.Update(deltaTime));
 };
 
-var materialGameObject = renderer.Add(new Material(Color4.White, true));
+var materialGameObject = renderer.Add(new Material(new Color4(1f, 1f, 1f, 0.5f), true));
 void RenderGameObjects()
 {
 	foreach (var gameObject in gameObjects)
@@ -36,51 +36,52 @@ void RenderGameObjects()
 		renderer.Enqueue(gameObject.Bounds(), materialGameObject);
 	}
 }
-window.UpdateFrame += _ => RenderGameObjects();
+window.RenderFrame += _ => RenderGameObjects();
 
-QuadtreeCollission quadTreeCollission = new(renderer);
-Func<HashSet<GameObject>> qtColl = () => quadTreeCollission.Check(gameObjects);
-Func<HashSet<GameObject>> bfColl = () => Scene.CollissionBruteForce(gameObjects);
+ICollissionAlgo algo = new BruteForceCollission();
 
-Func<HashSet<GameObject>> currentCollisionAlgo = bfColl;
 void ToggleAlgo()
 {
-	if(currentCollisionAlgo == bfColl)
+	switch(algo)
 	{
-		window.Title = "Quadtree Collision";
-		currentCollisionAlgo = qtColl;
-	}
-	else
-	{
-		currentCollisionAlgo = bfColl;
-		window.Title = "Brute Force Collision";
+		case BruteForceCollission bf:
+			algo = new QuadtreeCollission(renderer);
+			break;
+		case QuadtreeCollission qt:
+			algo = new GridCollission();
+			break;
+		case GridCollission g:
+			algo = new BruteForceCollission();
+			break;
 	}
 }
-ToggleAlgo();
-Stopwatch time = Stopwatch.StartNew();
-window.UpdateFrame += _ => 
+
+double time = 0;
+window.UpdateFrame += args => 
 {
-	if(time.Elapsed > TimeSpan.FromSeconds(2))
+	time -= args.Time;
+	if(time < 0)
 	{
 		ToggleAlgo();
-		time = Stopwatch.StartNew();
+		window.Title = algo.GetType().Name;
+		time = 2.0;
 	}
 };
 
 var materialCollission = renderer.Add(new Material(Color4.Red, false));
-void CheckCollision(Func<HashSet<GameObject>> currentCollisionAlgo)
+void CheckCollision(ICollissionAlgo algo)
 {
 	var stopwatch = Stopwatch.StartNew();
-	var colliding = currentCollisionAlgo();
-	Console.WriteLine($"{stopwatch.ElapsedMilliseconds}ms");
 
-	foreach (var gameObject in colliding)
+	foreach (var collider in algo.Check(gameObjects))
 	{
-		renderer.Enqueue(gameObject.Bounds().Scaled(new Vector2(2f), gameObject.Position), materialCollission);
+		renderer.Enqueue(collider.Bounds(), materialCollission);
 	}
-	if (currentCollisionAlgo == qtColl) quadTreeCollission.Render();
+	Console.WriteLine($"{stopwatch.ElapsedMilliseconds}ms");
+	algo.Render();
 }
-window.UpdateFrame += _ => CheckCollision(currentCollisionAlgo);
+
+window.UpdateFrame += _ => CheckCollision(algo);
 
 window.MouseDown += _ => SetMousePoint();
 void SetMousePoint()
@@ -91,7 +92,7 @@ void SetMousePoint()
 		var radius = new Vector2(0.01f);
 		var area = new Box2(p - radius, p + radius);
 		// only insert if no other point is nearby
-		if(!quadTreeCollission.QuadTree.Query(area).Any()) gameObjects.Add(new GameObject(p));
+		if(!gameObjects.Any(go => go.Bounds().Overlaps(area))) gameObjects.Add(new GameObject(p));
 	}
 }
 

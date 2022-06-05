@@ -31,6 +31,8 @@ namespace Example.Services
 		public void Draw()
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit);
+			GL.Enable(EnableCap.Blend);
+			GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
 
 			for (int i = 0; i < _materialRects.Count; ++i)
 			{
@@ -51,6 +53,7 @@ namespace Example.Services
 				GL.End();
 				rects.Clear();
 			}
+			GL.Disable(EnableCap.Blend);
 		}
 
 		private readonly List<List<Box2>> _materialRects = new();
