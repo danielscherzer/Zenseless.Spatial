@@ -1,17 +1,12 @@
-﻿using OpenTK.Mathematics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Zenseless.OpenTK;
-using Zenseless.Patterns;
 
 namespace Example
 {
 	internal class BruteForceCollision : ICollisionAlgo
 	{
-		public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
+		public static void Check(HashSet<GameObject> colliding, IReadOnlyList<GameObject> gameObjects)
 		{
-			HashSet<GameObject> colliding = new();
 			for (int i = 0; i < gameObjects.Count - 1; ++i)
 			{
 				for (int j = i + 1; j < gameObjects.Count; ++j)
@@ -25,6 +20,12 @@ namespace Example
 					}
 				}
 			}
+		}
+
+		public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
+		{
+			HashSet<GameObject> colliding = new();
+			Check(colliding, gameObjects);
 			return colliding;
 		}
 

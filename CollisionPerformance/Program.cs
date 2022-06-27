@@ -21,7 +21,7 @@ var renderer = new BoxRenderer();
 window.RenderFrame += _ => renderer.Draw();
 window.RenderFrame += _ => window.SwapBuffers();
 
-List<GameObject> gameObjects = Scene.CreateObjects(1000);
+List<GameObject> gameObjects = Scene.CreateObjects(2000);
 window.UpdateFrame += args =>
 {
 	var deltaTime = (float)args.Time;
@@ -48,7 +48,7 @@ void ToggleAlgo()
 			algo = new QuadtreeCollision(renderer);
 			break;
 		case QuadtreeCollision qt:
-			algo = new GridCollision();
+			algo = new GridCollision(renderer);
 			break;
 		case GridCollision g:
 			algo = new BruteForceCollision();
@@ -77,7 +77,7 @@ void CheckCollision(ICollisionAlgo algo)
 	{
 		renderer.Enqueue(collider.Bounds(), materialCollission);
 	}
-	Console.WriteLine($"{stopwatch.ElapsedMilliseconds}ms");
+	window.Title = $"{algo.GetType().Name}: {stopwatch.ElapsedMilliseconds}ms";
 	algo.Render();
 }
 
