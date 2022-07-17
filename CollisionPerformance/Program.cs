@@ -12,7 +12,15 @@ using Zenseless.OpenTK;
 
 GameWindow window = new(GameWindowSettings.Default, new NativeWindowSettings { Profile = ContextProfile.Compatability }); // window with immediate mode rendering enabled
 window.VSync = VSyncMode.On;
-window.KeyDown += args => { if (args.Key == Keys.Escape) window.Close(); };
+List<GameObject> gameObjects = Scene.CreateObjects(4000);
+window.KeyDown += args =>
+{
+	switch(args.Key)
+	{
+		case Keys.Escape: window.Close(); break;
+		case Keys.Space: gameObjects.Add(Scene.CreateObject()); break;
+	}
+};
 
 Viewport viewport = new();
 window.Resize += args => viewport.Resize(args.Width, args.Height);
@@ -21,7 +29,6 @@ var renderer = new BoxRenderer();
 window.RenderFrame += _ => renderer.Draw();
 window.RenderFrame += _ => window.SwapBuffers();
 
-List<GameObject> gameObjects = Scene.CreateObjects(2000);
 window.UpdateFrame += args =>
 {
 	var deltaTime = (float)args.Time;
@@ -48,7 +55,8 @@ void ToggleAlgo()
 			algo = new QuadtreeCollision(renderer);
 			break;
 		case QuadtreeCollision qt:
-			algo = new GridCollision(renderer);
+			int size = (int)MathF.Sqrt(gameObjects.Count);
+			algo = new GridCollision(renderer, size, size);
 			break;
 		case GridCollision g:
 			algo = new BruteForceCollision();
@@ -97,5 +105,3 @@ void SetMousePoint()
 }
 
 window.Run();
-
-

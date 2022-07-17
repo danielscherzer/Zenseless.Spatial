@@ -86,12 +86,9 @@ namespace Zenseless.Spatial
 		/// <param name="eval">Functor that will be executed for each cell</param>
 		public void ForEach(Func<CellType> eval)
 		{
-			for (int row = 0; row < Rows; row++)
+			for (int i = 0; i < _cells.Length; ++i)
 			{
-				for (int col = 0; col < Columns; col++)
-				{
-					_cells[ID(col, row)] = eval();
-				}
+				_cells[i] = eval();
 			}
 		}
 
