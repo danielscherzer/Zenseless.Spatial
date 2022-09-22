@@ -1,5 +1,6 @@
 ﻿using Example.Spatial;
 using OpenTK.Mathematics;
+using System;
 
 namespace Example
 {
@@ -11,16 +12,22 @@ namespace Example
 
 		public Vector2 Position { get; set; }
 		public Vector2 Velocity { get; set; }
-		public float Radius { get; } = 0.01f;
+		public float Radius { get; set; } = 0.002f;
 
 		public void Update(float deltaTime)
 		{
-			var center = Position + deltaTime * Velocity;
-			//wrap movement at window edges
-			if (center.X - Radius > 1) center.X = -1f - Radius;
-			if (center.X + Radius < -1) center.X = 1f + Radius;
-			if (center.Y - Radius > 1) center.Y = -1f - Radius;
-			if (center.Y + Radius < -1) center.Y = 1f + Radius;
+			var velocity = Velocity;
+			var center = Position + deltaTime * velocity;
+			//reflect at window edges, so object are always fully visible, because quad tree bounds should stay [-1,1]
+			for (int axe = 0; axe < 2; ++axe)
+			{
+				if (MathF.Abs(center[axe]) >= 1f - Radius)
+				{
+					center[axe] = (1f - Radius) * MathF.Sign(velocity[axe]);
+					velocity[axe] = -velocity[axe];
+				}
+			}
+			Velocity = velocity;
 			Position = center;
 		}
 	}

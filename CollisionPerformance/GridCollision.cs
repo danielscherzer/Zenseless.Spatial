@@ -3,25 +3,19 @@ using Example.Services;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Zenseless.Patterns;
 using Zenseless.Spatial;
 
 internal class GridCollision : ICollisionAlgo
 {
-	private readonly BoxRenderer _renderer;
-	private readonly Handle<Material> _material;
-	private readonly Box2 gridBounds = new(-1f, -1f, 1f, 1f);
-
 	public GridCollision(BoxRenderer renderer, int columns, int rows)
 	{
 		_renderer = renderer;
 		_material = renderer.Add(new Material(Color4.Green, false));
 		// init grid
 		grid = new(columns, rows);
-		for (int i = 0; i < grid.Cells.Length; ++i)
-		{
-			grid.Cells[i] = new List<GameObject>();
-		}
+		grid.ForEach(() => new List<GameObject>());
 	}
 
 	public Vector2i ToGrid(Vector2 point)
@@ -36,10 +30,8 @@ internal class GridCollision : ICollisionAlgo
 
 	public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
 	{
-		for (int i = 0; i < grid.Cells.Length; ++i)
-		{
-			grid.Cells[i].Clear();
-		}
+		grid.ForEach(cell => cell.Clear());
+
 		// fill grid
 		foreach (var gameObject in gameObjects)
 		{
@@ -49,19 +41,19 @@ internal class GridCollision : ICollisionAlgo
 			{
 				for(int x = gridBounds.Min.X; x <= gridBounds.Max.X; ++x)
 				{
+					//grid.CreateOrReturn(x, y, () => new List<GameObject>()).Add(gameObject);
 					grid[x, y].Add(gameObject);
 				}
 			}
 		}
 		var max = 0;
 		HashSet<GameObject> colliding = new();
-		for (int i = 0; i < grid.Cells.Length; ++i)
+		grid.ForEach(cell =>
 		{
-			var cell = grid.Cells[i];
 			max = Math.Max(max, cell.Count);
 			BruteForceCollision.Check(colliding, cell);
-		}
-		Console.WriteLine(max);
+		});
+		Debug.WriteLine($"Maximum entries per cell:{max}");
 		return colliding;
 	}
 
@@ -80,4 +72,8 @@ internal class GridCollision : ICollisionAlgo
 	}
 
 	private readonly Grid<List<GameObject>> grid;
+	//private readonly SparseGrid<List<GameObject>> grid;
+	private readonly BoxRenderer _renderer;
+	private readonly Handle<Material> _material;
+	private readonly Box2 gridBounds = new(-1f, -1f, 1f, 1f);
 }

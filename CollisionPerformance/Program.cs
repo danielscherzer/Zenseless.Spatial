@@ -10,17 +10,12 @@ using System.Diagnostics;
 using System.Linq;
 using Zenseless.OpenTK;
 
+Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 GameWindow window = new(GameWindowSettings.Default, new NativeWindowSettings { Profile = ContextProfile.Compatability }); // window with immediate mode rendering enabled
+var monitor = Monitors.GetPrimaryMonitor();
+window.Size = (Vector2i)new Vector2(monitor.HorizontalResolution / 1.5f, monitor.VerticalResolution / 1.5f);
 window.VSync = VSyncMode.On;
-List<GameObject> gameObjects = Scene.CreateObjects(4000);
-window.KeyDown += args =>
-{
-	switch(args.Key)
-	{
-		case Keys.Escape: window.Close(); break;
-		case Keys.Space: gameObjects.Add(Scene.CreateObject()); break;
-	}
-};
+List<GameObject> gameObjects = Scene.CreateObjects(10000);
 
 Viewport viewport = new();
 window.Resize += args => viewport.Resize(args.Width, args.Height);
@@ -29,8 +24,10 @@ var renderer = new BoxRenderer();
 window.RenderFrame += _ => renderer.Draw();
 window.RenderFrame += _ => window.SwapBuffers();
 
+bool freeze = true;
 window.UpdateFrame += args =>
 {
+	if (freeze) return;
 	var deltaTime = (float)args.Time;
 	gameObjects.ForEach(gameObject => gameObject.Update(deltaTime));
 };
@@ -45,47 +42,58 @@ void RenderGameObjects()
 }
 window.RenderFrame += _ => RenderGameObjects();
 
-ICollisionAlgo algo = new BruteForceCollision();
+ICollisionAlgo algo = new QuadtreeCollision(renderer);
 
-void ToggleAlgo()
+window.KeyDown += args =>
 {
-	switch(algo)
+	Reset();
+	switch (args.Key)
 	{
-		case BruteForceCollision bf:
-			algo = new QuadtreeCollision(renderer);
-			break;
-		case QuadtreeCollision qt:
+		case Keys.D1: algo = new BruteForceCollision(); break;
+		case Keys.D2:
 			int size = (int)MathF.Sqrt(gameObjects.Count);
 			algo = new GridCollision(renderer, size, size);
 			break;
-		case GridCollision g:
-			algo = new BruteForceCollision();
+		case Keys.D3: algo = new QuadtreeCollision(renderer); break;
+		case Keys.Escape: window.Close(); break;
+		case Keys.Down: gameObjects.RemoveRange(gameObjects.Count / 2, gameObjects.Count / 2); break;
+		case Keys.Up: gameObjects.AddRange(Scene.CreateObjects(gameObjects.Count)); break;
+		case Keys.Left: 
+			var coll = algo.Check(gameObjects);
+			foreach(var go in coll.Take(coll.Count / 2))
+			{
+				gameObjects.Remove(go);
+			}
 			break;
-	}
-}
-
-double time = 0;
-window.UpdateFrame += args => 
-{
-	time -= args.Time;
-	if(time < 0)
-	{
-		ToggleAlgo();
-		window.Title = algo.GetType().Name;
-		time = 2.0;
+		case Keys.Space: freeze = !freeze; break;
 	}
 };
 
 var materialCollission = renderer.Add(new Material(Color4.Red, false));
+double sum = 0;
+int count = -50;
+void Reset() { count = -5; sum = 0.0; }
 void CheckCollision(ICollisionAlgo algo)
 {
 	var stopwatch = Stopwatch.StartNew();
-
-	foreach (var collider in algo.Check(gameObjects))
+	var collisions = algo.Check(gameObjects);
+	foreach (var collider in collisions)
 	{
 		renderer.Enqueue(collider.Bounds(), materialCollission);
 	}
-	window.Title = $"{algo.GetType().Name}: {stopwatch.ElapsedMilliseconds}ms";
+
+	var message = $"Objects:{gameObjects.Count} {algo.GetType().Name}:Collisions={collisions.Count}";
+	++count;
+
+	var current = stopwatch.Elapsed.TotalMilliseconds;
+	if (count > 0)
+	{
+		sum += current;
+		message += $" avg:{sum / count:F2}ms";
+	}
+	message += $" last:{current:F2}ms";
+
+	window.Title = message;
 	algo.Render();
 }
 

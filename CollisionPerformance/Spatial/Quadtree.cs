@@ -1,70 +1,103 @@
 ﻿using OpenTK.Mathematics;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Specialized;
 using Zenseless.OpenTK;
 
 namespace Example.Spatial
 {
-	[DebuggerDisplay("Bounds={Bounds}")]
-	public class Quadtree<DataType> where DataType : IPosition
+	public abstract class QuadtreeBase<TItem> where TItem : IPosition
 	{
-		public Quadtree(Box2 bounds) => Bounds = bounds;
-
+		protected QuadtreeBase(in Box2 bounds) => Bounds = bounds;
 		public Box2 Bounds { get; }
+		public abstract bool NeedSplit { get; }
+		public abstract void Insert(TItem item);
+		public abstract void Query(Box2 area, ICollection<TItem> results);
+	}
 
-		public static uint Capacity { get; set; } = 3;
+	public class QuadtreeLeaf<TItem> : QuadtreeBase<TItem> where TItem : IPosition
+	{
+		public List<TItem> Items { get; } = new();
 
-		public Quadtree<DataType>[] Children => _children;
+		public QuadtreeLeaf(in Box2 bounds) : base(bounds) { }
 
-		public IEnumerable<DataType> Item => _items;
+		public override bool NeedSplit => Items.Count >= 9;
 
-		public bool Insert(DataType item)
+		public override void Insert(TItem item) => Items.Add(item);
+
+		public override void Query(Box2 area, ICollection<TItem> results)
 		{
-			if (!Bounds.Contains(item.Position)) return false;
-			if (_items.Count < Capacity)
+			//if (Box2Extensions.Overlaps(area, Bounds))
 			{
-				_items.Add(item);
-			}
-			else
-			{
-				if (0 == _children.Length) Subdivide();
-				foreach (var child in _children)
+				foreach (var item in Items)
 				{
-					if (child.Insert(item)) return true;
+					if (area.Contains(item.Position)) results.Add(item);
 				}
 			}
-			return true;
+			//else { }
 		}
+	}
 
-		public IEnumerable<DataType> Query(Box2 area)
+	public class QuadtreeNode<TItem> : QuadtreeBase<TItem> where TItem : IPosition
+	{
+		private readonly Vector2 center;
+
+		public QuadtreeBase<TItem>[] Children { get; }
+
+		public QuadtreeNode(in Box2 bounds) : base(bounds)
 		{
-			if (Box2Extensions.Overlaps(area, Bounds))
+			center = bounds.Center;
+			Children = new QuadtreeBase<TItem>[]
 			{
-				foreach (var item in Item)
-				{
-					if (area.Contains(item.Position)) yield return item;
-				}
-				foreach (var child in Children)
-				{
-					foreach (var point in child.Query(area)) yield return point;
-				}
-			}
-		}
-
-		private readonly List<DataType> _items = new();
-		private Quadtree<DataType>[] _children = Array.Empty<Quadtree<DataType>>();
-
-		private void Subdivide()
-		{
-			var h = 0.5f * Vector2.One;
-			_children = new Quadtree<DataType>[]
-			{
-				new Quadtree<DataType>(Bounds.Scaled(h, new Vector2(Bounds.Min.X, Bounds.Max.Y))),
-				new Quadtree<DataType>(Bounds.Scaled(h, Bounds.Max)),
-				new Quadtree<DataType>(Bounds.Scaled(h, Bounds.Min)),
-				new Quadtree<DataType>(Bounds.Scaled(h, new Vector2(Bounds.Max.X, Bounds.Min.Y))),
+				new QuadtreeLeaf<TItem>(new Box2(bounds.Min, center)),
+				new QuadtreeLeaf<TItem>(new Box2(center.X, bounds.Min.Y, bounds.Max.X, center.Y)),
+				new QuadtreeLeaf<TItem>(new Box2(bounds.Min.X, center.Y, center.X, bounds.Max.Y)),
+				new QuadtreeLeaf<TItem>(new Box2(center, bounds.Max)),
 			};
+		}
+
+		public override bool NeedSplit => false;
+
+		public override void Insert(TItem item)
+		{
+			int index = 0;
+			if (item.Position.X > center.X) index += 1;
+			if (item.Position.Y > center.Y) index += 2;
+			if (Children[index].NeedSplit)
+			{
+				Split(index);
+			}
+			Children[index].Insert(item);
+		}
+
+		public override void Query(Box2 area, ICollection<TItem> results)
+		{
+			int whichChildren = 0b1111;
+			if (center.X < area.Min.X) whichChildren &= 0b1010;
+			else if (center.X > area.Max.X) whichChildren &= 0b0101;
+
+			if (center.Y < area.Min.Y) whichChildren &= 0b1100;
+			else if (center.Y > area.Max.Y) whichChildren &= 0b0011;
+			for (int i = 0; i < 4; ++i, whichChildren >>= 1)
+			{
+				if (0 != (whichChildren & 0b0001)) Children[i].Query(area, results);
+			}
+			//TODO: check loop unrolling in C#
+			//if (0 != (whichChildren & 0b0001)) Children[0].Query(area, results);
+			//if (0 != (whichChildren & 0b0010)) Children[1].Query(area, results);
+			//if (0 != (whichChildren & 0b0100)) Children[2].Query(area, results);
+			//if (0 != (whichChildren & 0b1000)) Children[3].Query(area, results);
+		}
+
+		private void Split(int i)
+		{
+			QuadtreeLeaf<TItem> leaf = (QuadtreeLeaf<TItem>)Children[i];
+			QuadtreeNode<TItem> node = new(leaf.Bounds);
+			// move local items to children
+			foreach (var item in leaf.Items)
+			{
+				node.Insert(item);
+			}
+			Children[i] = node;
 		}
 	}
 }

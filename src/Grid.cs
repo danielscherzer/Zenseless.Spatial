@@ -32,8 +32,8 @@ namespace Zenseless.Spatial
 		/// <summary>
 		/// Returns a cell for a given column and row
 		/// </summary>
-		/// <param name="column">address of the cell</param>
-		/// <param name="row">address of the cell</param>
+		/// <param name="column">column of the cell</param>
+		/// <param name="row">row of the cell</param>
 		/// <returns>contents of a cell</returns>
 		public CellType this[int column, int row]
 		{
@@ -89,6 +89,18 @@ namespace Zenseless.Spatial
 			for (int i = 0; i < _cells.Length; ++i)
 			{
 				_cells[i] = eval();
+			}
+		}
+
+		/// <summary>
+		/// Iterate over all cells and execute <paramref name="exec"/> for each
+		/// </summary>
+		/// <param name="exec">Action that will be executed for each cell</param>
+		public void ForEach(Action<CellType> exec)
+		{
+			for (int i = 0; i < _cells.Length; ++i)
+			{
+				exec(_cells[i]);
 			}
 		}
 

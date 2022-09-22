@@ -10,8 +10,7 @@ namespace Example.Services
 	{
 		public Handle<Material> Add(Material material)
 		{
-			_materials.Add(material);
-			_materialRects.Add(new List<Box2>());
+			_materials.Add((material, new List<Box2>()));
 			return new Handle<Material>(_materials.Count - 1);
 		}
 
@@ -19,12 +18,12 @@ namespace Example.Services
 		{
 			try
 			{
-				var rects = _materialRects[materialHandle];
+				var rects = _materials[materialHandle].rects;
 				rects.Add(rectangle);
 			}
-			catch (ArgumentOutOfRangeException)
+			catch (ArgumentOutOfRangeException e)
 			{
-				throw new ApplicationException($"Invalid material id:{materialHandle}.");
+				throw new ArgumentOutOfRangeException($"Invalid material id:{materialHandle}.", e);
 			}
 		}
 
@@ -34,10 +33,9 @@ namespace Example.Services
 			GL.Enable(EnableCap.Blend);
 			GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
 
-			for (int i = 0; i < _materialRects.Count; ++i)
+			for (int i = 0; i < _materials.Count; ++i)
 			{
-				var material = _materials[i];
-				var rects = _materialRects[i];
+				(Material material, List<Box2> rects) = _materials[i];
 				GL.Color4(material.Color);
 				GL.PolygonMode(MaterialFace.FrontAndBack, material.Filled ? PolygonMode.Fill : PolygonMode.Line);
 				GL.Begin(PrimitiveType.Quads);
@@ -56,7 +54,6 @@ namespace Example.Services
 			GL.Disable(EnableCap.Blend);
 		}
 
-		private readonly List<List<Box2>> _materialRects = new();
-		private readonly List<Material> _materials = new();
+		private readonly List<(Material material, List<Box2> rects)> _materials = new();
 	}
 }
