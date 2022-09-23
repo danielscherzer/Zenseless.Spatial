@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using OpenTK.Mathematics;
+using System;
+using System.Collections.Generic;
 using Zenseless.OpenTK;
 
 namespace Example
@@ -9,9 +11,9 @@ namespace Example
 		{
 			for (int i = 0; i < gameObjects.Count - 1; ++i)
 			{
+				var a = gameObjects[i];
 				for (int j = i + 1; j < gameObjects.Count; ++j)
 				{
-					var a = gameObjects[i];
 					var b = gameObjects[j];
 					if (Box2Extensions.Overlaps(a.Bounds(), b.Bounds()))
 					{

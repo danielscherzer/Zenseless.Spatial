@@ -42,7 +42,9 @@ void RenderGameObjects()
 }
 window.RenderFrame += _ => RenderGameObjects();
 
-ICollisionAlgo algo = new QuadtreeCollision(renderer);
+int ColCount() => (int)MathF.Sqrt(gameObjects.Count);
+
+ICollisionAlgo algo = new IdGridCollision(renderer, ColCount(), ColCount());
 
 window.KeyDown += args =>
 {
@@ -50,11 +52,9 @@ window.KeyDown += args =>
 	switch (args.Key)
 	{
 		case Keys.D1: algo = new BruteForceCollision(); break;
-		case Keys.D2:
-			int size = (int)MathF.Sqrt(gameObjects.Count);
-			algo = new GridCollision(renderer, size, size);
-			break;
+		case Keys.D2: algo = new GridCollision(renderer, ColCount(), ColCount()); break;
 		case Keys.D3: algo = new QuadtreeCollision(renderer); break;
+		case Keys.D4:algo = new IdGridCollision(renderer, ColCount(), ColCount()); break;
 		case Keys.Escape: window.Close(); break;
 		case Keys.Down: gameObjects.RemoveRange(gameObjects.Count / 2, gameObjects.Count / 2); break;
 		case Keys.Up: gameObjects.AddRange(Scene.CreateObjects(gameObjects.Count)); break;

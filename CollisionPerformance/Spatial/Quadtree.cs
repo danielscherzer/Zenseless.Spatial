@@ -1,6 +1,8 @@
 ﻿using OpenTK.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 using Zenseless.OpenTK;
 
 namespace Example.Spatial
@@ -60,13 +62,22 @@ namespace Example.Spatial
 		public override void Insert(TItem item)
 		{
 			int index = 0;
-			if (item.Position.X > center.X) index += 1;
-			if (item.Position.Y > center.Y) index += 2;
-			if (Children[index].NeedSplit)
+			var pos = item.Position;
+			if (pos.X > center.X) index += 1;
+			if (pos.Y > center.Y) index += 2;
+			var child = Children[index];
+			if (child.NeedSplit)
 			{
-				Split(index);
+				QuadtreeLeaf<TItem> leaf = (QuadtreeLeaf<TItem>)child;
+				child = new QuadtreeNode<TItem>(leaf.Bounds);
+				// move local items to children
+				foreach (var it in leaf.Items)
+				{
+					child.Insert(it);
+				}
+				Children[index] = child;
 			}
-			Children[index].Insert(item);
+			child.Insert(item);
 		}
 
 		public override void Query(Box2 area, ICollection<TItem> results)
@@ -77,27 +88,17 @@ namespace Example.Spatial
 
 			if (center.Y < area.Min.Y) whichChildren &= 0b1100;
 			else if (center.Y > area.Max.Y) whichChildren &= 0b0011;
-			for (int i = 0; i < 4; ++i, whichChildren >>= 1)
-			{
-				if (0 != (whichChildren & 0b0001)) Children[i].Query(area, results);
-			}
-			//TODO: check loop unrolling in C#
-			//if (0 != (whichChildren & 0b0001)) Children[0].Query(area, results);
-			//if (0 != (whichChildren & 0b0010)) Children[1].Query(area, results);
-			//if (0 != (whichChildren & 0b0100)) Children[2].Query(area, results);
-			//if (0 != (whichChildren & 0b1000)) Children[3].Query(area, results);
-		}
 
-		private void Split(int i)
-		{
-			QuadtreeLeaf<TItem> leaf = (QuadtreeLeaf<TItem>)Children[i];
-			QuadtreeNode<TItem> node = new(leaf.Bounds);
-			// move local items to children
-			foreach (var item in leaf.Items)
-			{
-				node.Insert(item);
-			}
-			Children[i] = node;
+			if (0 != (whichChildren & 0b0001)) Children[0].Query(area, results);
+			if (0 != (whichChildren & 0b0010)) Children[1].Query(area, results);
+			if (0 != (whichChildren & 0b0100)) Children[2].Query(area, results);
+			if (0 != (whichChildren & 0b1000)) Children[3].Query(area, results);
+
+			//TODO: Why is loop unrolling not done by compiler?
+			//for (int i = 0; i < 4; ++i, whichChildren >>= 1)
+			//{
+			//	if (0 != (whichChildren & 0b0001)) Children[i].Query(area, results);
+			//}
 		}
 	}
 }
