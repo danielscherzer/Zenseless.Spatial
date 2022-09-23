@@ -20,7 +20,7 @@ namespace Example.Spatial
 
 		public QuadtreeLeaf(in Box2 bounds) : base(bounds) { }
 
-		public override bool NeedSplit => Items.Count >= 9;
+		public override bool NeedSplit => Items.Count >= 8;
 
 		public override void Insert(TItem item) => Items.Add(item);
 

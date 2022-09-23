@@ -15,7 +15,7 @@ GameWindow window = new(GameWindowSettings.Default, new NativeWindowSettings { P
 var monitor = Monitors.GetPrimaryMonitor();
 window.Size = (Vector2i)new Vector2(monitor.HorizontalResolution / 1.5f, monitor.VerticalResolution / 1.5f);
 window.VSync = VSyncMode.On;
-List<GameObject> gameObjects = Scene.CreateObjects(10000);
+List<GameObject> gameObjects = Scene.CreateObjects(20000);
 
 Viewport viewport = new();
 window.Resize += args => viewport.Resize(args.Width, args.Height);
