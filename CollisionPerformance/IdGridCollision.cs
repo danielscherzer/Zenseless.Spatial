@@ -33,6 +33,7 @@ internal class IdGridCollision : ICollisionAlgo
 	public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
 	{
 		grid.ForEach(cell => cell.Clear());
+		gameObjectBounds.Clear();
 
 		// fill grid
 		for (int id = 0; id < gameObjects.Count; id++)

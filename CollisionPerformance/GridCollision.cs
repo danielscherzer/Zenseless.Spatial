@@ -4,6 +4,7 @@ using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Zenseless.OpenTK;
 using Zenseless.Patterns;
 using Zenseless.Spatial;
 
