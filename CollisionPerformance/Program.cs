@@ -1,4 +1,5 @@
-﻿using Example;
+﻿using DefaultEcs;
+using Example;
 using Example.Collision;
 using Example.Services;
 using OpenTK.Mathematics;
@@ -17,7 +18,10 @@ var monitor = Monitors.GetPrimaryMonitor();
 window.Size = (Vector2i)new Vector2(monitor.HorizontalResolution / 1.5f, monitor.VerticalResolution / 1.5f);
 window.VSync = VSyncMode.On;
 
+using World world = new();
+
 Observable<int> objectCount = new();
+Observable<List<Vector2>> position = new();
 Observable<List<GameObject>> gameObjects = new();
 objectCount.Subscribe(count => GameObjects.Update(gameObjects, count));
 objectCount.Set(20000);
@@ -52,7 +56,9 @@ window.RenderFrame += _ => RenderGameObjects();
 int ColCount() => (int)MathF.Sqrt(objectCount);
 int colCount = ColCount();
 
-ICollisionAlgo algo = new IdGridCollision(renderer, ColCount(), ColCount());
+//ICollisionAlgo algo = new QuadtreeCollision(renderer);
+ICollisionAlgo algo = new RectQuadtreeCollision(renderer);
+//ICollisionAlgo algo = new IdGridCollision(renderer, ColCount(), ColCount());
 
 window.KeyDown += args =>
 {
@@ -61,8 +67,9 @@ window.KeyDown += args =>
 	{
 		case Keys.D1: algo = new BruteForceCollision(); break;
 		case Keys.D2: algo = new GridCollision(renderer, ColCount(), ColCount()); break;
-		case Keys.D3: algo = new QuadtreeCollision(renderer); break;
-		case Keys.D4:algo = new IdGridCollision(renderer, ColCount(), ColCount()); break;
+		case Keys.D3: algo = new IdGridCollision(renderer, ColCount(), ColCount()); break;
+		case Keys.D4: algo = new QuadtreeCollision(renderer); break;
+		case Keys.D5: algo = new RectQuadtreeCollision(renderer); break;
 		case Keys.Escape: window.Close(); break;
 		case Keys.Down: objectCount.Set(objectCount / 2); break;
 		case Keys.Up: objectCount.Set(objectCount * 2); break;

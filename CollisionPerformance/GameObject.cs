@@ -6,8 +6,6 @@ namespace Example
 {
 	public class GameObject : IPosition
 	{
-		public GameObject(Vector2 center) => Position = center;
-
 		public GameObject(float x, float y) => Position = new Vector2(x, y);
 
 		public Vector2 Position { get; set; }
