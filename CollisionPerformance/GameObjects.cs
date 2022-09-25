@@ -6,9 +6,9 @@ using Zenseless.Patterns;
 
 namespace Example
 {
-	internal class Scene
+	internal class GameObjects
 	{
-		public static GameObject CreateObject()
+		public static GameObject Create()
 		{
 			var x = random.NextFloat(-1f, 1f);
 			var y = random.NextFloat(-1f, 1f);
@@ -20,14 +20,27 @@ namespace Example
 			};
 		}
 
-		public static List<GameObject> CreateObjects(int count)
+		private static void Add(List<GameObject> gameObjects, int count)
 		{
-			List<GameObject> gameObjects = new();
 			for (int i = 0; i < count; ++i)
 			{
-				gameObjects.Add(CreateObject());
+				gameObjects.Add(Create());
 			}
-			return gameObjects;
+		}
+
+		internal static void Update(Observable<List<GameObject>> gameObjects, int count)
+		{
+			var go = gameObjects.HasValue ? gameObjects.Get() : new List<GameObject>();
+			var diff = go.Count - count;
+			if (0 < diff)
+			{
+				go.RemoveRange(go.Count - diff, diff);
+			}
+			else
+			{
+				Add(go, -diff);
+			}
+			gameObjects.Set(go);
 		}
 
 		private static readonly Random random = new(12);

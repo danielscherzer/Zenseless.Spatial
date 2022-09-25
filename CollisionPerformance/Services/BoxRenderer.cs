@@ -27,6 +27,14 @@ namespace Example.Services
 			}
 		}
 
+		public static void DrawQuads(Vector2[] points)
+		{
+			GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 0, points);
+			GL.EnableVertexAttribArray(0);
+			GL.DrawArrays(PrimitiveType.Quads, 0, points.Length);
+			GL.DisableVertexAttribArray(0);
+		}
+
 		public void Draw()
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit);
