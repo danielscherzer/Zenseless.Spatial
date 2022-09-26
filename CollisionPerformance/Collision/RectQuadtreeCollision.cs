@@ -24,7 +24,7 @@ namespace Example.Collision
             return new RectQuadtreeNode<int>(new Box2(-1f, -1f, 1f, 1f));
         }
 
-        public List<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
+        public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
         {
             _quadTree = Create();
 			for (int id = 0; id < gameObjects.Count; id++)
