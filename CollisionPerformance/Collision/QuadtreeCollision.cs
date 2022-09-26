@@ -17,20 +17,23 @@ namespace Example.Collision
             _renderer = renderer;
         }
 
-        private static QuadtreeNode<GameObject> Create()
+        private static QuadtreeNode<int> Create()
         {
-            return new QuadtreeNode<GameObject>(new Box2(-1f, -1f, 1f, 1f));
+            return new QuadtreeNode<int>(new Box2(-1f, -1f, 1f, 1f));
         }
 
         public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
         {
             _quadTree = Create();
-            foreach (var gameObject in gameObjects)
-            {
-                _quadTree.Insert(gameObject);
-            }
+			gameObjectBounds.Clear();
+			for (int id = 0; id < gameObjects.Count; id++)
+			{
+				var bounds = gameObjects[id].Bounds();
+				gameObjectBounds.Add(bounds);
+				_quadTree.Insert(gameObjects[id].Position, id);
+			}
             HashSet<GameObject> colliding = new();
-            List<GameObject> potential = new();
+            List<int> potential = new();
             foreach (var gameObject in gameObjects)
             {
                 potential.Clear();
@@ -38,7 +41,7 @@ namespace Example.Collision
                 var bounds = gameObject.Bounds(gameObject.Radius); //point quad tree -> enlarge bounds by object size
 
                 _quadTree.Query(bounds, potential);
-                BruteForceCollision.Check(colliding, potential);
+                IdGridCollision.Check(colliding, gameObjects, gameObjectBounds, potential);
             }
             return colliding;
         }
@@ -46,13 +49,14 @@ namespace Example.Collision
         public void Render() => Render(_renderer, _quadTree);
 
         private readonly Handle<Material> _materialQuadTree;
-        private QuadtreeNode<GameObject> _quadTree;
-        private readonly BoxRenderer _renderer;
+        private QuadtreeNode<int> _quadTree;
+		private readonly List<Box2> gameObjectBounds = new();
+		private readonly BoxRenderer _renderer;
 
-        private void Render(BoxRenderer renderer, QuadtreeBase<GameObject> quadTree)
+        private void Render(BoxRenderer renderer, QuadtreeBase<int> quadTree)
         {
             _renderer.Enqueue(quadTree.Bounds, _materialQuadTree);
-            if (quadTree is QuadtreeNode<GameObject> node)
+            if (quadTree is QuadtreeNode<int> node)
                 foreach (var child in node.Children)
                 {
                     Render(renderer, child);

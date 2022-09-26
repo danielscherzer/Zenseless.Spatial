@@ -7,39 +7,35 @@ using Zenseless.OpenTK;
 
 namespace Example.Spatial
 {
-	public abstract class QuadtreeBase<TItem> where TItem : IPosition
+	public abstract class QuadtreeBase<TItem>
 	{
 		protected QuadtreeBase(in Box2 bounds) => Bounds = bounds;
 		public Box2 Bounds { get; }
 		public abstract bool NeedSplit { get; }
-		public abstract void Insert(TItem item);
+		public abstract void Insert(Vector2 position, TItem item);
 		public abstract void Query(Box2 area, ICollection<TItem> results);
 	}
 
-	public class QuadtreeLeaf<TItem> : QuadtreeBase<TItem> where TItem : IPosition
+	public class QuadtreeLeaf<TItem> : QuadtreeBase<TItem>
 	{
-		public List<TItem> Items { get; } = new();
+		public List<(Vector2 position, TItem item)> Items { get; } = new();
 
 		public QuadtreeLeaf(in Box2 bounds) : base(bounds) { }
 
 		public override bool NeedSplit => Items.Count >= 8;
 
-		public override void Insert(TItem item) => Items.Add(item);
+		public override void Insert(Vector2 position, TItem item) => Items.Add((position, item));
 
 		public override void Query(Box2 area, ICollection<TItem> results)
 		{
-			//if (Box2Extensions.Overlaps(area, Bounds))
+			foreach ((Vector2 position, TItem item) in Items)
 			{
-				foreach (var item in Items)
-				{
-					if (area.Contains(item.Position)) results.Add(item);
-				}
+				if (area.Contains(position)) results.Add(item);
 			}
-			//else { }
 		}
 	}
 
-	public class QuadtreeNode<TItem> : QuadtreeBase<TItem> where TItem : IPosition
+	public class QuadtreeNode<TItem> : QuadtreeBase<TItem>
 	{
 		private readonly Vector2 center;
 
@@ -59,25 +55,24 @@ namespace Example.Spatial
 
 		public override bool NeedSplit => false;
 
-		public override void Insert(TItem item)
+		public override void Insert(Vector2 position, TItem item)
 		{
 			int index = 0;
-			var pos = item.Position;
-			if (pos.X > center.X) index += 1;
-			if (pos.Y > center.Y) index += 2;
+			if (position.X > center.X) index += 1;
+			if (position.Y > center.Y) index += 2;
 			var child = Children[index];
 			if (child.NeedSplit)
 			{
 				QuadtreeLeaf<TItem> leaf = (QuadtreeLeaf<TItem>)child;
 				child = new QuadtreeNode<TItem>(leaf.Bounds);
 				// move local items to children
-				foreach (var it in leaf.Items)
+				foreach ((Vector2 pos, TItem it) in leaf.Items)
 				{
-					child.Insert(it);
+						child.Insert(pos, it);
 				}
 				Children[index] = child;
 			}
-			child.Insert(item);
+			child.Insert(position, item);
 		}
 
 		public override void Query(Box2 area, ICollection<TItem> results)

@@ -27,6 +27,7 @@ namespace Example.Services
 			}
 		}
 
+		//TODO: Use vertex arrays
 		public static void DrawQuads(Vector2[] points)
 		{
 			GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 0, points);

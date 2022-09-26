@@ -45,7 +45,7 @@ namespace Example.Collision
         private RectQuadtreeNode<int> _quadTree;
         private readonly BoxRenderer _renderer;
 
-		private static void Check(HashSet<GameObject> colliding, IReadOnlyList<GameObject> gameObjects, IReadOnlyList<(Box2 bounds, int item)> items)
+		internal static void Check(HashSet<GameObject> colliding, IReadOnlyList<GameObject> gameObjects, IReadOnlyList<(Box2 bounds, int item)> items)
 		{
 			for (int i = 0; i < items.Count - 1; ++i)
 			{

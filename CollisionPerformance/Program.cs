@@ -56,8 +56,8 @@ window.RenderFrame += _ => RenderGameObjects();
 int ColCount() => (int)MathF.Sqrt(objectCount);
 int colCount = ColCount();
 
-//ICollisionAlgo algo = new QuadtreeCollision(renderer);
-ICollisionAlgo algo = new RectQuadtreeCollision(renderer);
+ICollisionAlgo algo = new QuadtreeCollision(renderer);
+//ICollisionAlgo algo = new RectQuadtreeCollision(renderer);
 //ICollisionAlgo algo = new IdGridCollision(renderer, ColCount(), ColCount());
 
 window.KeyDown += args =>
