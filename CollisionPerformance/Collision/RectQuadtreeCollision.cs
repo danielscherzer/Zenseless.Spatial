@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Zenseless.OpenTK;
 using Zenseless.Patterns;
 
 namespace Example.Collision
@@ -18,37 +19,53 @@ namespace Example.Collision
             _renderer = renderer;
         }
 
-        private static RectQuadtreeNode<GameObject> Create()
+        private static RectQuadtreeNode<int> Create()
         {
-            return new RectQuadtreeNode<GameObject>(new Box2(-1f, -1f, 1f, 1f));
+            return new RectQuadtreeNode<int>(new Box2(-1f, -1f, 1f, 1f));
         }
 
-        public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
+        public List<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
         {
             _quadTree = Create();
-            foreach (var gameObject in gameObjects)
+			for (int id = 0; id < gameObjects.Count; id++)
             {
-                _quadTree.Insert(gameObject.Bounds(), gameObject);
+                _quadTree.Insert(gameObjects[id].Bounds(), id);
             }
             HashSet<GameObject> colliding = new();
             _quadTree.Traverse(null, leaf =>
             {
-                var potential = leaf.Items.Select(pair => pair.item).ToList();
-				BruteForceCollision.Check(colliding, potential);
+                Check(colliding, gameObjects, leaf.Items);
 			});
             return colliding;
         }
 
-        public void Render() => Render(_renderer, _quadTree);
+		public void Render() => Render(_renderer, _quadTree);
 
         private readonly Handle<Material> _materialQuadTree;
-        private RectQuadtreeNode<GameObject> _quadTree;
+        private RectQuadtreeNode<int> _quadTree;
         private readonly BoxRenderer _renderer;
 
-        private void Render(BoxRenderer renderer, RectQuadtreeBase<GameObject> quadTree)
+		private static void Check(HashSet<GameObject> colliding, IReadOnlyList<GameObject> gameObjects, IReadOnlyList<(Box2 bounds, int item)> items)
+		{
+			for (int i = 0; i < items.Count - 1; ++i)
+			{
+				var a = items[i];
+				for (int j = i + 1; j < items.Count; ++j)
+				{
+					var b = items[j];
+					if (a.bounds.Overlaps(b.bounds))
+					{
+						colliding.Add(gameObjects[a.item]);
+						colliding.Add(gameObjects[b.item]);
+					}
+				}
+			}
+		}
+		
+        private void Render(BoxRenderer renderer, RectQuadtreeBase<int> quadTree)
         {
             _renderer.Enqueue(quadTree.Bounds, _materialQuadTree);
-            if (quadTree is RectQuadtreeNode<GameObject> node)
+            if (quadTree is RectQuadtreeNode<int> node)
                 foreach (var child in node.Children)
                 {
                     Render(renderer, child);
