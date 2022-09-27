@@ -1,10 +1,8 @@
-﻿using Example;
-using Example.Services;
+﻿using Example.Services;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Zenseless.OpenTK;
 using Zenseless.Patterns;
 using Zenseless.Spatial;
 

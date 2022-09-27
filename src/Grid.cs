@@ -58,7 +58,7 @@ namespace Zenseless.Spatial
 			get => _cells;
 			set
 			{
-				if(value.Length != Columns * Rows) throw new ArgumentException("Given array does not match in size.");
+				if (value.Length != Columns * Rows) throw new ArgumentException("Given array does not match in size.");
 				_cells = value;
 			}
 		}
@@ -112,7 +112,7 @@ namespace Zenseless.Spatial
 		{
 			for (int row = 0; row < Rows; row++)
 			{
-				for(int col = 0; col < Columns; col++)
+				for (int col = 0; col < Columns; col++)
 				{
 					_cells[ID(col, row)] = eval(col, row);
 				}
@@ -144,7 +144,7 @@ namespace Zenseless.Spatial
 		/// Number of rows in the grid.
 		/// </summary>
 		public int Rows { get; }
-		
+
 		IEnumerable<CellType> IReadOnlyGrid<CellType>.Cells => _cells;
 
 		/// <summary>
@@ -178,9 +178,9 @@ namespace Zenseless.Spatial
 			if (Columns != other.Columns || Rows != other.Rows) return false;
 			ReadOnlyCollection<CellType> self = AsReadOnly();
 			ReadOnlyCollection<CellType> o = other.AsReadOnly();
-			for(int i = 0; i < self.Count; ++i)
+			for (int i = 0; i < self.Count; ++i)
 			{
-				if(!Equals(self[i], o[i])) return false;
+				if (!Equals(self[i], o[i])) return false;
 			}
 			return true;
 		}

@@ -76,7 +76,7 @@ window.KeyDown += args =>
 		case Keys.Left:
 			var gos = new List<GameObject>(gameObjects.Get());
 			var coll = algo.Check(gos);
-			foreach(var go in coll.Take(coll.Count / 2))
+			foreach (var go in coll.Take(coll.Count / 2))
 			{
 				gos.Remove(go);
 			}

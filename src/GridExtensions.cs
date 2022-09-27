@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using System;
-
-namespace Zenseless.Spatial
+﻿namespace Zenseless.Spatial
 {
 	/// <summary>
 	/// 

@@ -91,7 +91,7 @@ namespace Zenseless.Spatial
 		public CellType CreateOrReturn(int column, int row, Func<CellType> eval)
 		{
 			var id = Id(column, row);
-			if(!_cells.TryGetValue(id, out var cell))
+			if (!_cells.TryGetValue(id, out var cell))
 			{
 				cell = eval();
 				_cells[id] = cell;

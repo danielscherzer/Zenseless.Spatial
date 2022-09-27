@@ -1,9 +1,5 @@
 ﻿using OpenTK.Mathematics;
-using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Runtime.CompilerServices;
-using Zenseless.OpenTK;
 
 namespace Example.Spatial
 {
@@ -68,7 +64,7 @@ namespace Example.Spatial
 				// move local items to children
 				foreach ((Vector2 pos, TItem it) in leaf.Items)
 				{
-						child.Insert(pos, it);
+					child.Insert(pos, it);
 				}
 				Children[index] = child;
 			}

@@ -1,5 +1,4 @@
-﻿using Zenseless.Spatial;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.Text.Json;
@@ -59,7 +58,7 @@ namespace Zenseless.Spatial.Tests
 		{
 			Grid<int> grid = new(127, 543);
 			grid.ForEach((col, row, value) => col + row * grid.Columns);
-			for(int i = 0; i < grid.Cells.Length; ++i)
+			for (int i = 0; i < grid.Cells.Length; ++i)
 			{
 				Assert.AreEqual(grid.Cells[i], i);
 			}
@@ -84,7 +83,7 @@ namespace Zenseless.Spatial.Tests
 		{
 			Grid<int> grid = new(2, 3);
 			grid.Cells = new int[] { 1, 2, 3, 4, 5, 6 };
-			for(int i = 0; i < grid.Cells.Length; ++i)
+			for (int i = 0; i < grid.Cells.Length; ++i)
 			{
 				Assert.AreEqual(i + 1, grid.Cells[i]);
 			}

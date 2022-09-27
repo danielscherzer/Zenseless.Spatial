@@ -1,9 +1,6 @@
 ﻿using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
 using Zenseless.OpenTK;
 
 namespace Example.Spatial
