@@ -14,7 +14,7 @@ namespace Example.Collision
 				for (int j = i + 1; j < gameObjects.Count; ++j)
 				{
 					var b = gameObjects[j];
-					if (a.Bounds().Overlaps(b.Bounds()))
+					if (a.Bounds.Overlaps(b.Bounds))
 					{
 						colliding.Add(a);
 						colliding.Add(b);

@@ -33,13 +33,11 @@ namespace Example.Collision
 		public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
 		{
 			grid.ForEach(cell => cell.Clear());
-			gameObjectBounds.Clear();
 
 			// fill grid
 			for (int id = 0; id < gameObjects.Count; id++)
 			{
-				var bounds = gameObjects[id].Bounds();
-				gameObjectBounds.Add(bounds);
+				var bounds = gameObjects[id].Bounds;
 				var gridBounds = new Box2i(ToGrid(bounds.Min), ToGrid(bounds.Max));
 				for (int y = gridBounds.Min.Y; y <= gridBounds.Max.Y; ++y)
 				{
@@ -54,7 +52,7 @@ namespace Example.Collision
 			grid.ForEach(cell =>
 			{
 				max = Math.Max(max, cell.Count);
-				Check(colliding, gameObjects, gameObjectBounds, cell);
+				Check(colliding, gameObjects, cell);
 			});
 			Debug.WriteLine($"Maximum entries per cell:{max}");
 			return colliding;
@@ -75,21 +73,20 @@ namespace Example.Collision
 		}
 
 		private readonly Grid<List<int>> grid;
-		private readonly List<Box2> gameObjectBounds = new();
 		private readonly BoxRenderer _renderer;
 		private readonly Handle<Material> _material;
 		private readonly Box2 gridBounds = new(-1f, -1f, 1f, 1f);
 
-		internal static void Check(HashSet<GameObject> colliding, IReadOnlyList<GameObject> gameObjects, List<Box2> gameObjectBounds, List<int> ids)
+		internal static void Check(HashSet<GameObject> colliding, IReadOnlyList<GameObject> gameObjects, List<int> ids)
 		{
 			for (int i = 0; i < ids.Count - 1; ++i)
 			{
 				var idA = ids[i];
-				var a = gameObjectBounds[ids[i]];
+				var a = gameObjects[idA].Bounds;
 				for (int j = i + 1; j < ids.Count; ++j)
 				{
 					var idB = ids[j];
-					var b = gameObjectBounds[idB];
+					var b = gameObjects[idB].Bounds;
 					if (a.Overlaps(b))
 					{
 						colliding.Add(gameObjects[idA]);

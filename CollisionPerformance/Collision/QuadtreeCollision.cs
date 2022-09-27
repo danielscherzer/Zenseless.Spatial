@@ -22,12 +22,16 @@ namespace Example.Collision
 
 		public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
 		{
+			static Box2 Inflate(GameObject gameObject)
+			{
+				Vector2 radii = new(2f * gameObject.Radius);
+				var pos = gameObject.Position;
+				return new Box2(pos - radii, pos + radii);
+			}
+
 			_quadTree = Create();
-			gameObjectBounds.Clear();
 			for (int id = 0; id < gameObjects.Count; id++)
 			{
-				var bounds = gameObjects[id].Bounds();
-				gameObjectBounds.Add(bounds);
 				_quadTree.Insert(gameObjects[id].Position, id);
 			}
 			HashSet<GameObject> colliding = new();
@@ -35,11 +39,11 @@ namespace Example.Collision
 			foreach (var gameObject in gameObjects)
 			{
 				potential.Clear();
-				//TODO: only works if radius is >= all objects -> change to rect quad tree
-				var bounds = gameObject.Bounds(gameObject.Radius); //point quad tree -> enlarge bounds by object size
+				//Only works because check (a coll b) and (b coll a) and only two categories should miss (big coll big)
+				var bounds = Inflate(gameObject); //point quad tree -> enlarge bounds by object size
 
 				_quadTree.Query(bounds, potential);
-				IdGridCollision.Check(colliding, gameObjects, gameObjectBounds, potential);
+				IdGridCollision.Check(colliding, gameObjects, potential);
 			}
 			return colliding;
 		}
@@ -48,7 +52,6 @@ namespace Example.Collision
 
 		private readonly Handle<Material> _materialQuadTree;
 		private QuadtreeNode<int> _quadTree;
-		private readonly List<Box2> gameObjectBounds = new();
 		private readonly BoxRenderer _renderer;
 
 		private void Render(BoxRenderer renderer, QuadtreeBase<int> quadTree)

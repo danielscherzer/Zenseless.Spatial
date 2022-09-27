@@ -48,7 +48,7 @@ void RenderGameObjects()
 {
 	foreach (var gameObject in gameObjects.Get())
 	{
-		renderer.Enqueue(gameObject.Bounds(), materialGameObject);
+		renderer.Enqueue(gameObject.Bounds, materialGameObject);
 	}
 }
 window.RenderFrame += _ => RenderGameObjects();
@@ -56,9 +56,9 @@ window.RenderFrame += _ => RenderGameObjects();
 int ColCount() => (int)MathF.Sqrt(objectCount);
 int colCount = ColCount();
 
-ICollisionAlgo algo = new QuadtreeCollision(renderer);
+//ICollisionAlgo algo = new QuadtreeCollision(renderer);
 //ICollisionAlgo algo = new RectQuadtreeCollision(renderer);
-//ICollisionAlgo algo = new IdGridCollision(renderer, ColCount(), ColCount());
+ICollisionAlgo algo = new IdGridCollision(renderer, ColCount(), ColCount());
 
 window.KeyDown += args =>
 {
@@ -98,7 +98,7 @@ void CheckCollision(ICollisionAlgo algo)
 	var collisions = algo.Check(gos);
 	foreach (var collider in collisions)
 	{
-		renderer.Enqueue(collider.Bounds(), materialCollission);
+		renderer.Enqueue(collider.Bounds, materialCollission);
 	}
 
 	var message = $"Objects:{gos.Count} {algo.GetType().Name}:Collisions={collisions.Count}";
@@ -128,7 +128,7 @@ void SetMousePoint()
 		var area = new Box2(p - radius, p + radius);
 
 		// only insert if no other point is nearby
-		if (!gameObjects.Get().Any(go => go.Bounds().Overlaps(area)))
+		if (!gameObjects.Get().Any(go => go.Bounds.Overlaps(area)))
 		{
 			objectCount.Set(objectCount + 1);
 			var gos = gameObjects.Get();

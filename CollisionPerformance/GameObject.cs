@@ -4,11 +4,22 @@ using System;
 
 namespace Example
 {
-	public class GameObject : IPosition
+	public class GameObject
 	{
-		public GameObject(float x, float y) => Position = new Vector2(x, y);
+		private Vector2 position;
 
-		public Vector2 Position { get; set; }
+		public GameObject(float x, float y) => Position = new Vector2(x, y);
+		public Box2 Bounds { get; private set; }
+		public Vector2 Position
+		{
+			get => position; 
+			set
+			{
+				position = value;
+				Vector2 radii = new(Radius);
+				Bounds = new Box2(position - radii, position + radii);
+			}
+		}
 		public Vector2 Velocity { get; set; }
 		public float Radius { get; set; } = 0.002f;
 

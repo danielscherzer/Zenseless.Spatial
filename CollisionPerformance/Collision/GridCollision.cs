@@ -36,7 +36,7 @@ namespace Example.Collision
 			// fill grid
 			foreach (var gameObject in gameObjects)
 			{
-				var bounds = gameObject.Bounds();
+				var bounds = gameObject.Bounds;
 				var gridBounds = new Box2i(ToGrid(bounds.Min), ToGrid(bounds.Max));
 				for (int y = gridBounds.Min.Y; y <= gridBounds.Max.Y; ++y)
 				{

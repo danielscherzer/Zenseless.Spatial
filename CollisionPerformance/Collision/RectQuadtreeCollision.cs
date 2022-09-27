@@ -27,7 +27,7 @@ namespace Example.Collision
 			_quadTree = Create();
 			for (int id = 0; id < gameObjects.Count; id++)
 			{
-				_quadTree.Insert(gameObjects[id].Bounds(), id);
+				_quadTree.Insert(gameObjects[id].Bounds, id);
 			}
 			HashSet<GameObject> colliding = new();
 			_quadTree.Traverse(null, leaf =>
