@@ -191,14 +191,14 @@ namespace Zenseless.Spatial
 		/// <returns>A 32-bit signed integer hash code.</returns>
 		public override int GetHashCode()
 		{
-			return Columns.GetHashCode() ^ Rows.GetHashCode() ^ _cells.GetHashCode();
+			return HashCode.Combine(Columns.GetHashCode(), Rows.GetHashCode(), _cells.GetHashCode());
 		}
 
 		/// <summary>
 		/// Returns a string that represents the current object.
 		/// </summary>
 		/// <returns>A string that represents the current object.</returns>
-		public override string? ToString()
+		public override string ToString()
 		{
 			return $"Columns:{Columns} Rows:{Rows} Cells:[{_cells}]";
 		}
