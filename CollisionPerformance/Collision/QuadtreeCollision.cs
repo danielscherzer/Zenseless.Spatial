@@ -24,9 +24,9 @@ namespace Example.Collision
 		{
 			static Box2 Inflate(GameObject gameObject)
 			{
-				Vector2 radii = new(2f * gameObject.Radius);
-				var pos = gameObject.Position;
-				return new Box2(pos - radii, pos + radii);
+				var bounds = gameObject.Bounds;
+				Vector2 radii = new(gameObject.Radius);
+				return new Box2(bounds.Min - radii, bounds.Max + radii);
 			}
 
 			_quadTree = Create();

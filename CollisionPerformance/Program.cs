@@ -56,9 +56,9 @@ window.RenderFrame += _ => RenderGameObjects();
 int ColCount() => (int)MathF.Sqrt(objectCount);
 int colCount = ColCount();
 
-//ICollisionAlgo algo = new QuadtreeCollision(renderer);
+ICollisionAlgo algo = new QuadtreeCollision(renderer);
 //ICollisionAlgo algo = new RectQuadtreeCollision(renderer);
-ICollisionAlgo algo = new IdGridCollision(renderer, ColCount(), ColCount());
+//ICollisionAlgo algo = new IdGridCollision(renderer, ColCount(), ColCount());
 
 window.KeyDown += args =>
 {
@@ -95,6 +95,7 @@ void CheckCollision(ICollisionAlgo algo)
 {
 	var stopwatch = Stopwatch.StartNew();
 	var gos = gameObjects.Get();
+	//var bounds = gameObjects.Get().Select(go => go.Bounds).ToList();
 	var collisions = algo.Check(gos);
 	foreach (var collider in collisions)
 	{
