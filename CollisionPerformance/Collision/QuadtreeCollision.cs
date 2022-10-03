@@ -1,67 +1,42 @@
-﻿using Example.Services;
-using Example.Spatial;
+﻿using Example.Spatial;
 using OpenTK.Mathematics;
 using System.Collections.Generic;
-using Zenseless.Patterns;
 
 namespace Example.Collision
 {
 	internal class QuadtreeCollision : ICollisionAlgo
 	{
-		public QuadtreeCollision(BoxRenderer renderer)
+		public QuadtreeCollision()
 		{
-			_materialQuadTree = renderer.Add(new Material(Color4.CornflowerBlue, false));
-			_quadTree = Create();
-			_renderer = renderer;
+			_quadTree = new QuadtreeNode<int>(new Box2(-1f, -1f, 1f, 1f));
 		}
 
-		private static QuadtreeNode<int> Create()
+		public void FindCollisions(ICollection<int> colliding, IReadOnlyList<Box2> boundsList)
 		{
-			return new QuadtreeNode<int>(new Box2(-1f, -1f, 1f, 1f));
-		}
-
-		public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
-		{
-			static Box2 Inflate(GameObject gameObject)
+			static Box2 Inflate(Box2 bounds)
 			{
-				var bounds = gameObject.Bounds;
-				Vector2 radii = new(gameObject.Radius);
-				return new Box2(bounds.Min - radii, bounds.Max + radii);
+				return new Box2(bounds.Min - bounds.HalfSize, bounds.Max + bounds.HalfSize);
 			}
 
-			_quadTree = Create();
-			for (int id = 0; id < gameObjects.Count; id++)
+			_quadTree.Clear();
+			for (int id = 0; id < boundsList.Count; id++)
 			{
-				_quadTree.Insert(gameObjects[id].Position, id);
+				_quadTree.Insert(boundsList[id].Center, id);
 			}
-			HashSet<GameObject> colliding = new();
+			colliding.Clear();
 			List<int> potential = new();
-			foreach (var gameObject in gameObjects)
+			foreach (var gameObject in boundsList)
 			{
 				potential.Clear();
 				//Only works because check (a coll b) and (b coll a) and only two categories should miss (big coll big)
 				var bounds = Inflate(gameObject); //point quad tree -> enlarge bounds by object size
 
 				_quadTree.Query(bounds, potential);
-				IdGridCollision.Check(colliding, gameObjects, potential);
+				BruteForceCollision.AddCollisions(colliding, boundsList, potential);
 			}
-			return colliding;
 		}
 
-		public void Render() => Render(_renderer, _quadTree);
-
-		private readonly Handle<Material> _materialQuadTree;
-		private QuadtreeNode<int> _quadTree;
-		private readonly BoxRenderer _renderer;
-
-		private void Render(BoxRenderer renderer, QuadtreeBase<int> quadTree)
-		{
-			_renderer.Enqueue(quadTree.Bounds, _materialQuadTree);
-			if (quadTree is QuadtreeNode<int> node)
-				foreach (var child in node.Children)
-				{
-					Render(renderer, child);
-				}
-		}
+		public IQuadtree<int> Tree => _quadTree;
+		private readonly QuadtreeNode<int> _quadTree;
 	}
 }

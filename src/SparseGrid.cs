@@ -1,30 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Zenseless.Spatial
 {
 	/// <summary>
-	/// A two dimensional sparse grid, internally represented by a dictionary.
+	/// A two dimensional sparse grid, internally represented by a dictionary and a morton code key.
 	/// </summary>
 	/// <typeparam name="CellType">Data type of each cell</typeparam>
 	[DebuggerDisplay("Count = {Count}")]
 	[Serializable]
-	public class SparseGrid<CellType>
+	public class SparseGrid<CellType> : IEnumerable<CellType>
 	{
-		/// <summary>
-		/// Create an instance with the given maximum dimensions
-		/// </summary>
-		/// <param name="columns">maximum number of columns</param>
-		/// <param name="rows">maximum number of rows</param>
-		public SparseGrid(int columns, int rows)
-		{
-			if (0 == columns) throw new ArgumentOutOfRangeException(nameof(columns));
-			if (0 == rows) throw new ArgumentOutOfRangeException(nameof(rows));
-			Columns = columns;
-			Rows = rows;
-		}
-
 		/// <summary>
 		/// Returns the value of a cell if it exists for a given column and row
 		/// </summary>
@@ -33,19 +21,14 @@ namespace Zenseless.Spatial
 		/// <returns>contents of a cell</returns>
 		public CellType this[int column, int row]
 		{
-			get { return _cells[Id(column, row)]; }
-			set { _cells[Id(column, row)] = value; }
+			get { return _cells[SparseGrid<CellType>.Id(column, row)]; }
+			set { _cells[SparseGrid<CellType>.Id(column, row)] = value; }
 		}
 
 		/// <summary>
-		/// Number of cells
+		/// Clear all cells of the grid
 		/// </summary>
-		public int Count => _cells.Count;
-
-		/// <summary>
-		/// Maximum number of columns
-		/// </summary>
-		public int Columns { get; }
+		public void Clear() => _cells.Clear();
 
 		/// <summary>
 		/// Checks if the given cell exists
@@ -53,7 +36,7 @@ namespace Zenseless.Spatial
 		/// <param name="column">column of the cell</param>
 		/// <param name="row">row of the cell</param>
 		/// <returns></returns>
-		public bool Contains(int column, int row) => _cells.ContainsKey(Id(column, row));
+		public bool Contains(int column, int row) => _cells.ContainsKey(SparseGrid<CellType>.Id(column, row));
 
 		/// <summary>
 		/// Iterate over all cells and execute <paramref name="exec"/> for each
@@ -90,7 +73,7 @@ namespace Zenseless.Spatial
 		/// <returns></returns>
 		public CellType CreateOrReturn(int column, int row, Func<CellType> eval)
 		{
-			var id = Id(column, row);
+			var id = SparseGrid<CellType>.Id(column, row);
 			if (!_cells.TryGetValue(id, out var cell))
 			{
 				cell = eval();
@@ -99,8 +82,15 @@ namespace Zenseless.Spatial
 			return cell;
 		}
 
-		private int Id(int column, int row) => column + Columns * row;
+		/// <summary>
+		/// Returns an enumerator that iterates through the cell items.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerator<CellType> GetEnumerator() => _cells.Values.GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => _cells.Values.GetEnumerator();
 
 		private readonly Dictionary<int, CellType> _cells = new();
+		private static int Id(int column, int row) => (int)Morton.Interleave((uint)column, (uint)row);
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Example.Services
+namespace Example.Rendering
 {
 	public struct Material
 	{

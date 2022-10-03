@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Example
+namespace Example.Core
 {
 	internal class Observable<TType>
 	{

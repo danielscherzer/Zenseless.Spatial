@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -145,7 +146,13 @@ namespace Zenseless.Spatial
 		/// </summary>
 		public int Rows { get; }
 
-		IEnumerable<CellType> IReadOnlyGrid<CellType>.Cells => _cells;
+		/// <summary>
+		/// Returns an enumerator that iterates through the cell items.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerator<CellType> GetEnumerator() => ((IEnumerable<CellType>)_cells).GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => _cells.GetEnumerator();
 
 		/// <summary>
 		/// Is the given column and row number contained in the grid

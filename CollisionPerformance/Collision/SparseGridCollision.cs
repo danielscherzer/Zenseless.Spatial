@@ -6,28 +6,28 @@ using Zenseless.Spatial;
 
 namespace Example.Collision
 {
-	internal class GridCollision : ICollisionAlgo
+	internal class SparseGridCollision : ICollisionAlgo
 	{
-		public GridCollision(int columns, int rows)
+		public SparseGridCollision(int columns, int rows)
 		{
+			var size = new Vector2(columns, rows);
+			scale = size / gridBounds.Size;
+
+			cellMax = new Vector2i(columns - 1, rows - 1);
 			// init grid
-			grid = new(columns, rows);
+			grid = new();
 			grid.ForEach(() => new List<int>());
 		}
 
 		public Vector2i ToGrid(Vector2 point)
 		{
-			var size = new Vector2(grid.Columns, grid.Rows);
-			var cellMax = new Vector2i(grid.Columns - 1, grid.Rows - 1);
-			var scale = size / gridBounds.Size;
-
 			var p = scale * (point - gridBounds.Min);
 			return Vector2i.Clamp((Vector2i)p, Vector2i.Zero, cellMax);
 		}
 
 		public void FindCollisions(ICollection<int> colliding, IReadOnlyList<Box2> boundsList)
 		{
-			grid.ForEach(cell => cell.Clear());
+			grid.Clear();
 
 			// fill grid
 			for (int id = 0; id < boundsList.Count; id++)
@@ -38,8 +38,7 @@ namespace Example.Collision
 				{
 					for (int x = gridBounds.Min.X; x <= gridBounds.Max.X; ++x)
 					{
-						grid[x, y].Add(id);
-						//grid.CreateOrReturn(x, y, () => new List<int>()).Add(id);
+						grid.CreateOrReturn(x, y, () => new List<int>()).Add(id);
 					}
 				}
 			}
@@ -53,10 +52,9 @@ namespace Example.Collision
 			Debug.WriteLine($"Maximum entries per cell:{max}");
 		}
 
-		public IReadOnlyGrid<List<int>> Grid => grid;
-
-		private readonly Grid<List<int>> grid;
-		//private readonly SparseGrid<List<int>> grid;
+		private readonly SparseGrid<List<int>> grid;
 		private readonly Box2 gridBounds = new(-1f, -1f, 1f, 1f);
+		private readonly Vector2 scale;
+		private readonly Vector2i cellMax;
 	}
 }

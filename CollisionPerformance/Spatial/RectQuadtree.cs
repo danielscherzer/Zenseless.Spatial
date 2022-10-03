@@ -1,35 +1,39 @@
 ﻿using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Zenseless.OpenTK;
 
 namespace Example.Spatial
 {
-	public abstract class RectQuadtreeBase<TItem>
+	public abstract class RectQuadtreeBase<TItem> : IQuadtree<TItem>
 	{
 		protected RectQuadtreeBase(in Box2 bounds) => Bounds = bounds;
 		public Box2 Bounds { get; }
 		public abstract bool NeedSplit { get; }
+		public abstract void Clear();
 		public abstract void Insert(Box2 bounds, TItem item);
 		public abstract void Query(Box2 area, ICollection<TItem> results);
 		public abstract void Traverse(Action<RectQuadtreeNode<TItem>>? actionNode, Action<RectQuadtreeLeaf<TItem>>? actionLeaf);
 	}
 
-	public class RectQuadtreeLeaf<TItem> : RectQuadtreeBase<TItem>
+	public class RectQuadtreeLeaf<TItem> : RectQuadtreeBase<TItem>, IQuadtreeLeaf<TItem>
 	{
-		private readonly List<(Box2 bounds, TItem item)> _items = new();
-
-		public IReadOnlyList<(Box2 bounds, TItem item)> Items => _items;
-
 		public RectQuadtreeLeaf(in Box2 bounds) : base(bounds) { }
 
+		public IReadOnlyList<(Box2 bounds, TItem item)> BoundItems => _items;
+
+		public override void Clear() => _items.Clear();
+
 		public override bool NeedSplit => _items.Count >= 8;
+
+		IEnumerable<TItem> IQuadtreeLeaf<TItem>.Items => BoundItems.Select(i => i.item);
 
 		public override void Insert(Box2 bounds, TItem item) => _items.Add((bounds, item));
 
 		public override void Query(Box2 area, ICollection<TItem> results)
 		{
-			foreach ((Box2 bounds, TItem item) in Items)
+			foreach ((Box2 bounds, TItem item) in BoundItems)
 			{
 				if (area.Overlaps(bounds)) results.Add(item);
 			}
@@ -37,9 +41,11 @@ namespace Example.Spatial
 
 		public override void Traverse(Action<RectQuadtreeNode<TItem>>? actionNode
 			, Action<RectQuadtreeLeaf<TItem>>? actionLeaf) => actionLeaf?.Invoke(this);
+
+		private readonly List<(Box2 bounds, TItem item)> _items = new();
 	}
 
-	public class RectQuadtreeNode<TItem> : RectQuadtreeBase<TItem>
+	public class RectQuadtreeNode<TItem> : RectQuadtreeBase<TItem>, IQuadtreeNode<TItem>
 	{
 		private readonly Vector2 center;
 
@@ -48,16 +54,21 @@ namespace Example.Spatial
 		public RectQuadtreeNode(in Box2 bounds) : base(bounds)
 		{
 			center = bounds.Center;
-			Children = new RectQuadtreeBase<TItem>[]
-			{
-				new RectQuadtreeLeaf<TItem>(new Box2(bounds.Min, center)),
-				new RectQuadtreeLeaf<TItem>(new Box2(center.X, bounds.Min.Y, bounds.Max.X, center.Y)),
-				new RectQuadtreeLeaf<TItem>(new Box2(bounds.Min.X, center.Y, center.X, bounds.Max.Y)),
-				new RectQuadtreeLeaf<TItem>(new Box2(center, bounds.Max)),
-			};
+			Children = new RectQuadtreeBase<TItem>[4];
+			Clear();
+		}
+
+		public override void Clear()
+		{
+			Children[0] = new RectQuadtreeLeaf<TItem>(new Box2(Bounds.Min, center));
+			Children[1] = new RectQuadtreeLeaf<TItem>(new Box2(center.X, Bounds.Min.Y, Bounds.Max.X, center.Y));
+			Children[2] = new RectQuadtreeLeaf<TItem>(new Box2(Bounds.Min.X, center.Y, center.X, Bounds.Max.Y));
+			Children[3] = new RectQuadtreeLeaf<TItem>(new Box2(center, Bounds.Max));
 		}
 
 		public override bool NeedSplit => false;
+
+		IQuadtree<TItem>[] IQuadtreeNode<TItem>.Children => Children;
 
 		public override void Insert(Box2 bounds, TItem item)
 		{
@@ -69,7 +80,7 @@ namespace Example.Spatial
 					RectQuadtreeLeaf<TItem> leaf = (RectQuadtreeLeaf<TItem>)child;
 					child = new RectQuadtreeNode<TItem>(leaf.Bounds);
 					// move local items to children
-					foreach ((Box2 b, TItem i) in leaf.Items)
+					foreach ((Box2 b, TItem i) in leaf.BoundItems)
 					{
 						child.Insert(b, i);
 					}
@@ -115,6 +126,7 @@ namespace Example.Spatial
 		public override void Traverse(Action<RectQuadtreeNode<TItem>>? actionNode
 			, Action<RectQuadtreeLeaf<TItem>>? actionLeaf)
 		{
+			//TODO: Check loop unrolling
 			foreach (var child in Children)
 			{
 				child.Traverse(actionNode, actionLeaf);

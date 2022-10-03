@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using Example.Core;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using Zenseless.Patterns;
@@ -7,16 +8,20 @@ namespace Example
 {
 	internal class GameObjects
 	{
+		public static GameObject Create(float x, float y)
+		{
+			var size = random.NextFloat();
+			return new GameObject(x, y, size < 0.99f ? 0.002f : 0.01f)
+			{
+				Velocity = new Vector2(random.NextFloat(-0.01f, 0.01f), random.NextFloat(-0.01f, 0.01f)),
+			};
+		}
+
 		public static GameObject Create()
 		{
 			var x = random.NextFloat(-1f, 1f);
 			var y = random.NextFloat(-1f, 1f);
-			var size = random.NextFloat();
-			return new GameObject(x, y)
-			{
-				Velocity = new Vector2(random.NextFloat(-0.01f, 0.01f), random.NextFloat(-0.01f, 0.01f)),
-				Radius = size < 0.99f ? 0.002f : 0.01f,
-			};
+			return Create(x, y);
 		}
 
 		private static void Add(List<GameObject> gameObjects, int count)

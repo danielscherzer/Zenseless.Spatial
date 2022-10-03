@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK.Mathematics;
+using System;
 using System.Collections.Generic;
 using Zenseless.OpenTK;
 
@@ -6,32 +7,41 @@ namespace Example.Collision
 {
 	internal class BruteForceCollision : ICollisionAlgo
 	{
-		public static void Check(HashSet<GameObject> colliding, IReadOnlyList<GameObject> gameObjects)
+		public void FindCollisions(ICollection<int> colliding, IReadOnlyList<Box2> bounds)
 		{
-			for (int i = 0; i < gameObjects.Count - 1; ++i)
+			colliding.Clear();
+			for (int i = 0; i < bounds.Count - 1; ++i)
 			{
-				var a = gameObjects[i];
-				for (int j = i + 1; j < gameObjects.Count; ++j)
+				var a = bounds[i];
+				for (int j = i + 1; j < bounds.Count; ++j)
 				{
-					var b = gameObjects[j];
-					if (a.Bounds.Overlaps(b.Bounds))
+					var b = bounds[j];
+					if (a.Overlaps(b))
 					{
-						colliding.Add(a);
-						colliding.Add(b);
+						colliding.Add(i);
+						colliding.Add(j);
 					}
 				}
 			}
 		}
 
-		public HashSet<GameObject> Check(IReadOnlyList<GameObject> gameObjects)
+		internal static void AddCollisions(ICollection<int> colliding, IReadOnlyList<Box2> bounds, IReadOnlyList<int> ids)
 		{
-			HashSet<GameObject> colliding = new();
-			Check(colliding, gameObjects);
-			return colliding;
-		}
-
-		public void Render()
-		{
+			for (int i = 0; i < ids.Count - 1; ++i)
+			{
+				var idA = ids[i];
+				var a = bounds[idA];
+				for (int j = i + 1; j < ids.Count; ++j)
+				{
+					var idB = ids[j];
+					var b = bounds[idB];
+					if (a.Overlaps(b))
+					{
+						colliding.Add(idA);
+						colliding.Add(idB);
+					}
+				}
+			}
 		}
 	}
 }
