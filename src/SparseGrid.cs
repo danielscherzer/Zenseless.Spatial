@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Zenseless.Spatial
 {
@@ -14,7 +15,7 @@ namespace Zenseless.Spatial
 	public class SparseGrid<CellType> : IEnumerable<CellType>
 	{
 		/// <summary>
-		/// Returns the value of a cell if it exists for a given column and row
+		/// For a given column and row returns the value of a cell if it exists or sets the value of the cell 
 		/// </summary>
 		/// <param name="column">column of the cell</param>
 		/// <param name="row">row of the cell</param>
@@ -36,7 +37,7 @@ namespace Zenseless.Spatial
 		/// <param name="column">column of the cell</param>
 		/// <param name="row">row of the cell</param>
 		/// <returns></returns>
-		public bool Contains(int column, int row) => _cells.ContainsKey(SparseGrid<CellType>.Id(column, row));
+		public bool Contains(int column, int row) => _cells.ContainsKey(Id(column, row));
 
 		/// <summary>
 		/// Iterate over all cells and execute <paramref name="exec"/> for each
@@ -58,11 +59,6 @@ namespace Zenseless.Spatial
 				_cells[i] = eval();
 			}
 		}
-
-		/// <summary>
-		/// Maximum number of rows in the grid.
-		/// </summary>
-		public int Rows { get; }
 
 		/// <summary>
 		/// Returns the value of the cell or if the cell does not exists creates it with the given functor
@@ -90,7 +86,9 @@ namespace Zenseless.Spatial
 
 		IEnumerator IEnumerable.GetEnumerator() => _cells.Values.GetEnumerator();
 
-		private readonly Dictionary<int, CellType> _cells = new();
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static int Id(int column, int row) => (int)Morton.Interleave((uint)column, (uint)row);
+
+		private readonly Dictionary<int, CellType> _cells = new();
 	}
 }

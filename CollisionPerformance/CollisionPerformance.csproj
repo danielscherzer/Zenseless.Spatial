@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <!--<PackageReference Include="DefaultEcs" Version="0.17.2" />-->
-    <PackageReference Include="Zenseless.OpenTK" Version="0.1.47" />
+    <PackageReference Include="Zenseless.OpenTK" Version="0.1.50" />
   </ItemGroup>
 
   <ItemGroup>

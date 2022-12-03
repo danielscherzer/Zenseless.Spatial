@@ -7,7 +7,7 @@ namespace Zenseless.Spatial
 	/// Interface for a grid with read only access
 	/// </summary>
 	/// <typeparam name="CellType"></typeparam>
-	public interface IReadOnlyGrid<CellType> : IEnumerable<CellType>
+	public interface IReadOnlyGrid<CellType>
 	{
 		/// <summary>
 		/// Returns a cell for a given column and row
@@ -16,6 +16,11 @@ namespace Zenseless.Spatial
 		/// <param name="row">address of the cell</param>
 		/// <returns>contents of a cell</returns>
 		CellType this[int column, int row] { get; }
+
+		/// <summary>
+		/// Return the array of cells for direct manipulation
+		/// </summary>
+		public CellType[] Cells { get; }
 
 		/// <summary>
 		/// A <seealso cref="ReadOnlyCollection{T}"/> of cells.
