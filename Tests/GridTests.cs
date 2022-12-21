@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Zenseless.Spatial;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.Text.Json;
@@ -136,6 +137,20 @@ namespace Zenseless.Spatial.Tests
 			grid2.Fill(78);
 			Assert.IsTrue(grid.Equals(grid2));
 			grid[grid.Columns - 1, grid.Rows - 1] = 4;
+		}
+
+		[DataTestMethod()]
+		[DataRow(0, 0)]
+		[DataRow(8, 2)]
+		[DataRow(0, 1)]
+		[DataRow(9, 2)]
+		public void GetIDTest(int column, int row)
+		{
+			Grid<int> grid = new(10, 3);
+			var id = grid.GetID(column, row);
+			var (actualColumn, actualRow) = grid.GetColRow(id);
+			Assert.AreEqual(actualColumn, column);
+			Assert.AreEqual(actualRow, row);
 		}
 	}
 }

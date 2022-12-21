@@ -38,8 +38,8 @@ namespace Zenseless.Spatial
 		/// <returns>contents of a cell</returns>
 		public CellType this[int column, int row]
 		{
-			get { return _cells[ID(column, row)]; }
-			set { _cells[ID(column, row)] = value; }
+			get { return _cells[GetID(column, row)]; }
+			set { _cells[GetID(column, row)] = value; }
 		}
 
 		/// <summary>
@@ -115,7 +115,7 @@ namespace Zenseless.Spatial
 			{
 				for (int col = 0; col < Columns; col++)
 				{
-					_cells[ID(col, row)] = eval(col, row);
+					_cells[GetID(col, row)] = eval(col, row);
 				}
 			}
 		}
@@ -130,7 +130,7 @@ namespace Zenseless.Spatial
 			{
 				for (int col = 0; col < Columns; col++)
 				{
-					var id = ID(col, row);
+					var id = GetID(col, row);
 					_cells[id] = eval(col, row, _cells[id]);
 				}
 			}
@@ -155,8 +155,8 @@ namespace Zenseless.Spatial
 		/// <summary>
 		/// Is the given column and row number contained in the grid
 		/// </summary>
-		/// <param name="column">address of the cell</param>
-		/// <param name="row">address of the cell</param>
+		/// <param name="column">Column number of the cell</param>
+		/// <param name="row">Row number of the cell</param>
 		/// <returns><c>true</c> if the column and row combination is contained in the grid, <c>false</c> otherwise.</returns>
 		public bool Valid(int column, int row) => 0 <= column && column < Columns && 0 <= row && row < Rows;
 
@@ -210,7 +210,21 @@ namespace Zenseless.Spatial
 
 		private CellType[] _cells;
 
+		/// <summary>
+		/// Returns the array id for a given column, row pair
+		/// </summary>
+		/// <param name="column">column of the cell</param>
+		/// <param name="row">row of the cell</param>
+		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int ID(int column, int row) => column + Columns * row;
+		public int GetID(int column, int row) => column + Columns * row;
+
+		/// <summary>
+		/// Returns a column row tuple for the given array position
+		/// </summary>
+		/// <param name="id">The array position</param>
+		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public (int column, int row) GetColRow(int id) => (id % Columns, id / Columns);
 	}
 }
