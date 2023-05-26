@@ -14,14 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="links\**" />
-    <EmbeddedResource Remove="links\**" />
-    <None Remove="links\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <!--<PackageReference Include="DefaultEcs" Version="0.17.2" />-->
-    <PackageReference Include="Zenseless.OpenTK" Version="0.1.50" />
+    <PackageReference Include="Zenseless.OpenTK.Gui" Version="0.1.15" />
   </ItemGroup>
 
   <ItemGroup>

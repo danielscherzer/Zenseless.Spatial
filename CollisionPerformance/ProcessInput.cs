@@ -31,7 +31,6 @@ internal class ProcessInput
 				gameObjects.Set(gos);
 				break;
 			case Keys.Space: freeze = !freeze; break;
-				//case Keys.End: broadPhaseVisual = null;
 		}
 		return false;
 	}

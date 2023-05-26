@@ -24,7 +24,7 @@ Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
 //window
 GameWindow window = new(GameWindowSettings.Default, new NativeWindowSettings { Profile = ContextProfile.Compatability }); // window with immediate mode rendering enabled
-var monitor = Monitors.GetPrimaryMonitor();
+var monitor = Monitors.GetMonitorFromWindow(window);
 window.Size = (Vector2i)new Vector2(monitor.HorizontalResolution / 1.5f, monitor.VerticalResolution / 1.5f);
 window.VSync = VSyncMode.On;
 
