@@ -215,7 +215,7 @@ namespace Zenseless.Spatial
 		/// <param name="row">row of the cell</param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetID(int column, int row) => column + Columns * row;
+		public int GetID(int column, int row) => column + (Columns * row);
 
 		/// <summary>
 		/// Returns a column row tuple for the given array position

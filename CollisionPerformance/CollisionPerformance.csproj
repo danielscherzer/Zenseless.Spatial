@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>Example</RootNamespace>
     <Nullable>enable</Nullable>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
@@ -14,8 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="DefaultEcs" Version="0.17.2" />-->
-    <PackageReference Include="Zenseless.OpenTK.Gui" Version="0.1.17" />
+    <PackageReference Include="Zenseless.OpenTK.Gui" Version="0.1.24" />
   </ItemGroup>
 
   <ItemGroup>

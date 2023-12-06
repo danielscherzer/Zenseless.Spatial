@@ -2,6 +2,7 @@
 using Example.Collision;
 using Example.Core;
 using Example.Rendering;
+using ImGuiNET;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Zenseless.OpenTK;
+using Zenseless.OpenTK.GUI;
 
 // state
 Observable<List<GameObject>> gameObjects = new();
@@ -27,9 +29,12 @@ GameWindow window = new(GameWindowSettings.Default, ImmediateMode.NativeWindowSe
 var monitor = Monitors.GetMonitorFromWindow(window);
 window.Size = (Vector2i)new Vector2(monitor.HorizontalResolution / 1.5f, monitor.VerticalResolution / 1.5f);
 window.VSync = VSyncMode.On;
+ImGuiFacade gui = new(window);
+gui.LoadFontDroidSans(24f);
 
 broadPhaseAlgo.Subscribe(algoType => algo = Setup(algoType));
 broadPhaseAlgo.Subscribe(_ => Reset());
+gameObjects.Subscribe(_ => Reset());
 
 window.UpdateFrame += args => { if (!freeze) Update.Movement((float)args.Time, gameObjects); };
 
@@ -37,6 +42,8 @@ window.RenderFrame += _ => Rendering.NewFrame();
 window.RenderFrame += _ => Rendering.Draw(gameObjects.Get().Select(go => go.Bounds), gameObjects.Count(), new Material(new Color4(1f, 1f, 1f, 0.5f), true));
 window.RenderFrame += _ => Rendering.Draw(collisions.Select(id => gameObjects.Get()[id].Bounds), collisions.Count, new Material(Color4.Red, false));
 window.RenderFrame += _ => Rendering.Draw(broadPhaseVisual);
+window.RenderFrame += _ => Rendering.Reset();
+window.RenderFrame += _ => gui.Render(window.ClientSize);
 window.RenderFrame += _ => window.SwapBuffers();
 
 Viewport viewport = new();
@@ -70,34 +77,51 @@ ICollisionAlgo Setup(BroadPhaseAlgo broadPhaseAlgo)
 	}
 }
 
-window.KeyDown += args => { if (ProcessInput.Keyboard(args.Key, broadPhaseAlgo, gameObjects, collisions, ref freeze)) window.Close(); };
+window.KeyDown += args => { if (ProcessInput.Keyboard(args.Key, gameObjects, collisions)) window.Close(); };
 
 double sum = 0;
 int count = -50;
 void Reset() { count = -5; sum = 0.0; }
-void CheckCollision()
+void Gui()
 {
+	ImGui.NewFrame();
+	ImGui.SetNextWindowPos(System.Numerics.Vector2.Zero);
+	ImGui.Begin("stats", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration);
+
 	if (algo is null) return;
 	var stopwatch = Stopwatch.StartNew();
-	var gos = gameObjects.Get();
+
+	var objectCount = gameObjects.Get().Count;
+	if(ImGui.SliderInt("Objects", ref objectCount, 1, 100000, "%d", ImGuiSliderFlags.Logarithmic))
+	{
+		gameObjects.SetCount(objectCount);
+	}
+
 	var bounds = gameObjects.Get().Select(go => go.Bounds).ToList();
 	algo.FindCollisions(collisions, bounds);
+	ImGui.Text($"Collisions:{collisions.Count}");
 
-	var message = $"Objects:{gos.Count} {algo.GetType().Name}:Collisions={collisions.Count}";
 	++count;
-
 	var current = stopwatch.Elapsed.TotalMilliseconds;
 	if (count > 0)
 	{
 		sum += current;
-		message += $" avg:{sum / count:F2}ms";
+		ImGui.Text($"AVG:{sum / count:F2}ms");
 	}
-	message += $" last:{current:F2}ms";
+	ImGui.Text($"last:{current:F2}ms");
+	ImGui.Checkbox("Freeze", ref freeze);
 
-	window.Title = message;
+	var algoNames = Enum.GetNames(typeof(BroadPhaseAlgo));
+	var currentAlgo = (int)broadPhaseAlgo.Get();
+	if (ImGui.Combo("Algorithm type", ref currentAlgo, algoNames, algoNames.Length))
+	{
+		broadPhaseAlgo.Set((BroadPhaseAlgo)currentAlgo);
+	}
+
+	ImGui.End();
 }
 
-window.UpdateFrame += _ => CheckCollision();
+window.UpdateFrame += _ => Gui();
 
 window.MouseDown += _ => ProcessInput.Mouse(gameObjects, window.MouseState, viewport.InvViewportMatrix);
 

@@ -15,7 +15,7 @@ internal static class Update
 		{
 			var velocity = go.Velocity;
 			var bounds = go.Bounds;
-			var center = bounds.Center + deltaTime * velocity;
+			var center = bounds.Center + (deltaTime * velocity);
 			//reflect at window edges, so object are always fully visible, because quad tree bounds should stay [-1,1]
 			for (int axe = 0; axe < 2; ++axe)
 			{

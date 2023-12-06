@@ -57,7 +57,7 @@ namespace Zenseless.Spatial.Tests
 		public void Foreach2Test()
 		{
 			Grid<int> grid = new(127, 543);
-			grid.ForEach((col, row, value) => col + row * grid.Columns);
+			grid.ForEach((col, row, value) => col + (row * grid.Columns));
 			for (int i = 0; i < grid.Cells.Length; ++i)
 			{
 				Assert.AreEqual(grid.Cells[i], i);

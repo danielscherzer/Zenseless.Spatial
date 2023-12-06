@@ -55,6 +55,15 @@ namespace Example.Rendering
 			if (broadPhaseVisual is null) return;
 			SetMaterial(broadPhaseVisual.Material);
 			Draw(PrimitiveType.Quads, broadPhaseVisual.Points);
+			GL.Color4(1f, 1f, 1f, 1f);
+			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+		}
+
+		internal static void Reset()
+		{
+			GL.Color4(1f, 1f, 1f, 1f);
+			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+			GL.Enable(EnableCap.Blend);
 		}
 	}
 }

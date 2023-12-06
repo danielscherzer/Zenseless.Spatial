@@ -40,6 +40,11 @@ namespace Zenseless.Spatial
 		public bool Contains(int column, int row) => _cells.ContainsKey(Id(column, row));
 
 		/// <summary>
+		/// Gets the value of elements in the grid
+		/// </summary>
+		public int Count => _cells.Count;
+
+		/// <summary>
 		/// Iterate over all cells and execute <paramref name="exec"/> for each
 		/// </summary>
 		/// <param name="exec">Action that will be executed for each cell</param>
