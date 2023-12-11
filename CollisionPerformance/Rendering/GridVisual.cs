@@ -15,22 +15,20 @@ internal sealed class GridVisual : IVisual
 	}
 
 	public Material Material { get; }
-	public Vector2[] Points
+
+	public Vector2[] CalcPoints()
 	{
-		get
+		var colSize = 2f / grid.Columns;
+		var rowSize = 2f / grid.Rows;
+		Box2 baseCell = new(0f, 0f, colSize, rowSize);
+		List<Box2> cells = new(grid.Columns * grid.Rows);
+		for (float x = -1f; x < 1f; x += colSize)
 		{
-			var colSize = 2f / grid.Columns;
-			var rowSize = 2f / grid.Rows;
-			Box2 baseCell = new(0f, 0f, colSize, rowSize);
-			List<Box2> cells = new(grid.Columns * grid.Rows);
-			for (float x = -1f; x < 1f; x += colSize)
+			for (float y = -1f; y < 1f; y += rowSize)
 			{
-				for (float y = -1f; y < 1f; y += rowSize)
-				{
-					cells.Add(baseCell.Translated(new Vector2(x, y)));
-				}
+				cells.Add(baseCell.Translated(new Vector2(x, y)));
 			}
-			return Rendering.CalcPoints(cells, cells.Count);
 		}
+		return Rendering.CalcPoints(cells, cells.Count);
 	}
 }

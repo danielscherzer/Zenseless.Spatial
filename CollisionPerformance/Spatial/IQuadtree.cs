@@ -1,22 +1,21 @@
 ﻿using OpenTK.Mathematics;
 using System.Collections.Generic;
 
-namespace Example.Spatial
+namespace Example.Spatial;
+
+public interface IQuadtree<TItem>
 {
-	public interface IQuadtree<TItem>
-	{
-		Box2 Bounds { get; }
-		void Clear();
-		void Query(Box2 area, ICollection<TItem> results);
-	}
+	Box2 Bounds { get; }
+	void Clear();
+	void Query(Box2 area, ICollection<TItem> results);
+}
 
-	public interface IQuadtreeLeaf<TItem> : IQuadtree<TItem>
-	{
-		IEnumerable<TItem> Items { get; }
-	}
+public interface IQuadtreeLeaf<TItem> : IQuadtree<TItem>
+{
+	IEnumerable<TItem> Items { get; }
+}
 
-	public interface IQuadtreeNode<TItem> : IQuadtree<TItem>
-	{
-		IQuadtree<TItem>[] Children { get; }
-	}
+public interface IQuadtreeNode<TItem> : IQuadtree<TItem>
+{
+	IQuadtree<TItem>[] Children { get; }
 }

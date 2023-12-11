@@ -1,16 +1,8 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Example.Rendering
-{
-	public struct Material
-	{
-		public Material(Color4 color, bool filled) : this()
-		{
-			Color = color;
-			Filled = filled;
-		}
+namespace Example.Rendering;
 
-		public Color4 Color { get; set; }
-		public bool Filled { get; set; }
-	}
+public readonly record struct Material(Color4 Color, bool Filled)
+{
+	public static Material Default => new(Color4.White, true);
 }

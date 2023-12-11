@@ -39,23 +39,24 @@ internal sealed class GridCollision : ICollisionAlgo
 				for (int x = gridBounds.Min.X; x <= gridBounds.Max.X; ++x)
 				{
 					grid[x, y].Add(id);
-					//grid.CreateOrReturn(x, y, () => new List<int>()).Add(id);
 				}
 			}
 		}
 		var max = 0;
+		var sum = 0;
 		colliding.Clear();
 		grid.ForEach(cell =>
 		{
 			max = Math.Max(max, cell.Count);
+			sum += cell.Count;
 			BruteForceCollision.AddCollisions(colliding, boundsList, cell);
 		});
-		ImGui.Text($"Maximum entries per cell:{max}");
+		ImGui.Text($"Cells:{grid.Cells.Length}");
+		ImGui.Text($"Entries per cell Max={max} Avg={sum / (float)grid.Cells.Length:F2}");
 	}
 
 	public IReadOnlyGrid<List<int>> Grid => grid;
 
 	private readonly Grid<List<int>> grid;
-	//private readonly SparseGrid<List<int>> grid;
 	private readonly Box2 gridBounds = new(-1f, -1f, 1f, 1f);
 }

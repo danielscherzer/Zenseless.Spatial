@@ -15,23 +15,20 @@ internal sealed class TreeVisual : IVisual
 	}
 
 	public Material Material { get; }
-	public Vector2[] Points
+	public Vector2[] CalcPoints()
 	{
-		get
-		{
-			List<Box2> cells = new();
+		List<Box2> cells = new();
 
-			void AddBounds(IQuadtree<int> quadTree)
-			{
-				cells.Add(quadTree.Bounds);
-				if (quadTree is IQuadtreeNode<int> node)
-					foreach (var child in node.Children)
-					{
-						AddBounds(child);
-					}
-			}
-			AddBounds(tree);
-			return Rendering.CalcPoints(cells, cells.Count);
+		void AddBounds(IQuadtree<int> quadTree)
+		{
+			cells.Add(quadTree.Bounds);
+			if (quadTree is IQuadtreeNode<int> node)
+				foreach (var child in node.Children)
+				{
+					AddBounds(child);
+				}
 		}
+		AddBounds(tree);
+		return Rendering.CalcPoints(cells, cells.Count);
 	}
 }

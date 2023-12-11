@@ -5,7 +5,7 @@
 //
 /////////////////////////////////////////////////////////////////////
 #define TREE_WITH_PARENT_POINTERS
-
+/*
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1347,3 +1347,4 @@ namespace IntervalTree
 	}
 
 }
+*/

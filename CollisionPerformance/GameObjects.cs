@@ -24,14 +24,6 @@ internal sealed class GameObjects
 		return Create(x, y);
 	}
 
-	private static void Add(List<GameObject> gameObjects, int count)
-	{
-		for (int i = 0; i < count; ++i)
-		{
-			gameObjects.Add(Create());
-		}
-	}
-
 	internal static void Update(Observable<List<GameObject>> gameObjects, int count)
 	{
 		var go = gameObjects.HasValue ? gameObjects.Get() : new List<GameObject>();
@@ -45,6 +37,14 @@ internal sealed class GameObjects
 			Add(go, -diff);
 		}
 		gameObjects.Set(go);
+	}
+
+	private static void Add(List<GameObject> gameObjects, int count)
+	{
+		for (int i = 0; i < count; ++i)
+		{
+			gameObjects.Add(Create());
+		}
 	}
 
 	private static readonly Random random = new(12);

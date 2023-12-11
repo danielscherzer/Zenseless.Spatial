@@ -35,6 +35,8 @@ gui.LoadFontDroidSans(24f);
 broadPhaseAlgo.Subscribe(algoType => algo = Setup(algoType));
 broadPhaseAlgo.Subscribe(_ => Reset());
 gameObjects.Subscribe(_ => Reset());
+gameObjects.Subscribe(_ => broadPhaseAlgo.Set(broadPhaseAlgo.Get()));
+
 
 window.UpdateFrame += args => { if (!freeze) Update.Movement((float)args.Time, gameObjects); };
 
@@ -42,12 +44,14 @@ window.RenderFrame += _ => Rendering.NewFrame();
 window.RenderFrame += _ => Rendering.Draw(gameObjects.Get().Select(go => go.Bounds), gameObjects.Count(), new Material(new Color4(1f, 1f, 1f, 0.5f), true));
 window.RenderFrame += _ => Rendering.Draw(collisions.Select(id => gameObjects.Get()[id].Bounds), collisions.Count, new Material(Color4.Red, false));
 window.RenderFrame += _ => Rendering.Draw(broadPhaseVisual);
-window.RenderFrame += _ => Rendering.Reset();
+window.RenderFrame += _ => Rendering.SetMaterial(Material.Default);
 window.RenderFrame += _ => gui.Render(window.ClientSize);
 window.RenderFrame += _ => window.SwapBuffers();
 
 Viewport viewport = new();
 window.Resize += args => viewport.Resize(args.Width, args.Height);
+
+window.MouseDown += _ => { if (!ImGuiHelper.HasGuiFocus()) ProcessInput.CreateGameObject(gameObjects, window.MouseState.Position, viewport.InvViewportMatrix); };
 
 gameObjects.SetCount(20000);
 broadPhaseAlgo.Set(BroadPhaseAlgo.SparseGrid);
@@ -63,8 +67,9 @@ ICollisionAlgo Setup(BroadPhaseAlgo broadPhaseAlgo)
 			return collGrid;
 		case BroadPhaseAlgo.SparseGrid:
 			int colCount2 = (int)MathF.Sqrt(gameObjects.Count());
-			broadPhaseVisual = null;
-			return new SparseGridCollision(colCount2, colCount2);
+			var sparseCollGrid = new SparseGridCollision(colCount2, colCount2);
+			broadPhaseVisual = new SparseGridVisual(sparseCollGrid.Grid, gameObjects, new Material(Color4.LightPink, false));
+			return sparseCollGrid;
 		case BroadPhaseAlgo.QuadtreePoint:
 			var collTree = new QuadtreeCollision();
 			broadPhaseVisual = new TreeVisual(collTree.Tree, new Material(Color4.CornflowerBlue, false));
@@ -73,7 +78,9 @@ ICollisionAlgo Setup(BroadPhaseAlgo broadPhaseAlgo)
 			var collTree2 = new RectQuadtreeCollision();
 			broadPhaseVisual = new TreeVisual(collTree2.Tree, new Material(Color4.Goldenrod, false));
 			return collTree2;
-		default: return new BruteForceCollision();
+		default:
+			broadPhaseVisual = null;
+			return new BruteForceCollision();
 	}
 }
 
@@ -85,14 +92,13 @@ void Reset() { count = -5; sum = 0.0; }
 void Gui()
 {
 	ImGui.NewFrame();
-	ImGui.SetNextWindowPos(System.Numerics.Vector2.Zero);
-	ImGui.Begin("stats", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration);
+	ImGui.Begin("stats", ImGuiWindowFlags.AlwaysAutoResize);
 
 	if (algo is null) return;
 	var stopwatch = Stopwatch.StartNew();
 
-	var objectCount = gameObjects.Get().Count;
-	if(ImGui.SliderInt("Objects", ref objectCount, 1, 100000, "%d", ImGuiSliderFlags.Logarithmic))
+	var objectCount = gameObjects.Count();
+	if (ImGui.SliderInt("Objects", ref objectCount, 1, 100000, "%d", ImGuiSliderFlags.Logarithmic))
 	{
 		gameObjects.SetCount(objectCount);
 	}
@@ -122,7 +128,5 @@ void Gui()
 }
 
 window.UpdateFrame += _ => Gui();
-
-window.MouseDown += _ => ProcessInput.Mouse(gameObjects, window.MouseState, viewport.InvViewportMatrix);
 
 window.Run();

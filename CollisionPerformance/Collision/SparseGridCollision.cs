@@ -2,7 +2,6 @@
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Zenseless.Spatial;
 
 namespace Example.Collision;
@@ -13,11 +12,7 @@ internal sealed class SparseGridCollision : ICollisionAlgo
 	{
 		var size = new Vector2(columns, rows);
 		scale = size / gridBounds.Size;
-
 		cellMax = new Vector2i(columns - 1, rows - 1);
-		// init grid
-		grid = new();
-		grid.ForEach(() => new List<int>());
 	}
 
 	public Vector2i ToGrid(Vector2 point)
@@ -44,16 +39,20 @@ internal sealed class SparseGridCollision : ICollisionAlgo
 			}
 		}
 		var max = 0;
+		var sum = 0;
 		colliding.Clear();
 		grid.ForEach(cell =>
 		{
 			max = Math.Max(max, cell.Count);
+			sum += cell.Count;
 			BruteForceCollision.AddCollisions(colliding, boundsList, cell);
 		});
-		ImGui.Text($"Maximum entries per cell:{max}");
+		ImGui.Text($"Cells:{grid.Count}");
+		ImGui.Text($"Entries per cell Max={max} Avg={sum / (float)grid.Count:F2}");
 	}
+	public SparseGrid<List<int>> Grid => grid;
 
-	private readonly SparseGrid<List<int>> grid;
+	private readonly SparseGrid<List<int>> grid = new();
 	private readonly Box2 gridBounds = new(-1f, -1f, 1f, 1f);
 	private readonly Vector2 scale;
 	private readonly Vector2i cellMax;

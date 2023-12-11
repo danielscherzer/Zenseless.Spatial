@@ -1,10 +1,9 @@
-﻿using OpenTK.Mathematics; //TODO: Change to system.numerics
+﻿using OpenTK.Mathematics;
 
-namespace Example.Rendering
+namespace Example.Rendering;
+
+internal interface IVisual //TODO: Can this be removed and record used?
 {
-	internal interface IVisual
-	{
-		Material Material { get; }
-		Vector2[] Points { get; }
-	}
+	Material Material { get; }
+	Vector2[] CalcPoints();
 }

@@ -1,10 +1,10 @@
-﻿namespace Example
+﻿namespace Example;
+
+internal enum BroadPhaseAlgo
 {
-	internal enum BroadPhaseAlgo
-	{
-		Grid,
-		QuadtreePoint,
-		QuadTreeRect,
-		SparseGrid,
-	}
+	None,
+	Grid,
+	SparseGrid,
+	QuadtreePoint,
+	QuadTreeRect,
 }

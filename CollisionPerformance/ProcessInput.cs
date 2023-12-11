@@ -1,7 +1,6 @@
 ﻿using Example.Core;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Zenseless.OpenTK;
@@ -29,19 +28,12 @@ internal sealed class ProcessInput
 		return false;
 	}
 
-	internal static void Mouse(Observable<List<GameObject>> gameObjects, MouseState mouseState, Matrix4 invViewportMatrix)
+	internal static void CreateGameObject(Observable<List<GameObject>> gameObjects, Vector2 pixelPosition, Matrix4 invViewportMatrix)
 	{
-		var p = mouseState.Position.Transform(invViewportMatrix);
-		var radius = new Vector2(0.01f);
-		var area = new Box2(p - radius, p + radius);
-
-		// only insert if no other point is nearby
-		if (!gameObjects.Get().Any(go => go.Bounds.Overlaps(area)))
-		{
-			var gos = gameObjects.Get();
-			var go = GameObjects.Create(p.X, p.Y);
-			gos.Add(go);
-			gameObjects.Set(gos);
-		}
+		var p = pixelPosition.Transform(invViewportMatrix);
+		var gos = gameObjects.Get();
+		var go = GameObjects.Create(p.X, p.Y);
+		gos.Add(go);
+		gameObjects.Set(gos);
 	}
 }
