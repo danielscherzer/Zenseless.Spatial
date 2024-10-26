@@ -26,7 +26,7 @@ internal sealed class GameObjects
 
 	internal static void Update(Observable<List<GameObject>> gameObjects, int count)
 	{
-		var go = gameObjects.HasValue ? gameObjects.Get() : new List<GameObject>();
+		var go = gameObjects.HasValue ? gameObjects.Get() : [];
 		var diff = go.Count - count;
 		if (0 < diff)
 		{

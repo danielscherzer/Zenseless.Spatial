@@ -17,7 +17,7 @@ using Zenseless.OpenTK.GUI;
 Observable<List<GameObject>> gameObjects = new();
 Observable<BroadPhaseAlgo> broadPhaseAlgo = new();
 bool freeze = true;
-HashSet<int> collisions = new();
+HashSet<int> collisions = [];
 IVisual? broadPhaseVisual = null;
 ICollisionAlgo? algo = null;
 

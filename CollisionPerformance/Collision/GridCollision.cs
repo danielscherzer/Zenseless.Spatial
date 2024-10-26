@@ -12,7 +12,7 @@ internal sealed class GridCollision : ICollisionAlgo
 	{
 		// init grid
 		grid = new(columns, rows);
-		grid.ForEach(() => new List<int>());
+		grid.ForEach(() => []);
 	}
 
 	public Vector2i ToGrid(Vector2 point)

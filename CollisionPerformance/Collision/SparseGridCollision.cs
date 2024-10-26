@@ -34,7 +34,7 @@ internal sealed class SparseGridCollision : ICollisionAlgo
 			{
 				for (int x = gridBounds.Min.X; x <= gridBounds.Max.X; ++x)
 				{
-					grid.CreateOrReturn(x, y, () => new List<int>()).Add(id);
+					grid.CreateOrReturn(x, y, () => []).Add(id);
 				}
 			}
 		}

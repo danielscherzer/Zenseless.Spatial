@@ -5,16 +5,9 @@ using Zenseless.Spatial;
 
 namespace Example.Rendering;
 
-internal sealed class SparseGridVisual : IVisual
+internal sealed class SparseGridVisual(SparseGrid<List<int>> grid, Observable<List<GameObject>> gameObjects, Material material) : IVisual
 {
-	public SparseGridVisual(SparseGrid<List<int>> grid, Observable<List<GameObject>> gameObjects, Material material)
-	{
-		this.grid = grid;
-		this.gameObjects = gameObjects;
-		Material = material;
-	}
-
-	public Material Material { get; }
+	public Material Material { get; } = material;
 
 	public Vector2[] CalcPoints()
 	{
@@ -35,7 +28,4 @@ internal sealed class SparseGridVisual : IVisual
 		}
 		return Rendering.CalcPoints(cells, cells.Count);
 	}
-
-	private readonly SparseGrid<List<int>> grid;
-	private readonly Observable<List<GameObject>> gameObjects;
 }
