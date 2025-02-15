@@ -117,9 +117,9 @@ void Gui()
 	ImGui.Text($"last:{current:F2}ms");
 	ImGui.Checkbox("Freeze", ref freeze);
 
-	var algoNames = Enum.GetNames(typeof(BroadPhaseAlgo));
+	var algoNames = Enum.GetNames<BroadPhaseAlgo>();
 	var currentAlgo = (int)broadPhaseAlgo.Get();
-	if (ImGui.Combo("Algorithm type", ref currentAlgo, algoNames, algoNames.Length))
+	if (ImGui.ListBox("Algorithm type", ref currentAlgo, algoNames, algoNames.Length))
 	{
 		broadPhaseAlgo.Set((BroadPhaseAlgo)currentAlgo);
 	}

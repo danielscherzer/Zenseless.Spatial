@@ -2,6 +2,7 @@
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using Zenseless.OpenTK;
 using Zenseless.Spatial;
 
 namespace Example.Collision;
@@ -13,6 +14,45 @@ internal sealed class SparseGridCollision : ICollisionAlgo
 		var size = new Vector2(columns, rows);
 		scale = size / gridBounds.Size;
 		cellMax = new Vector2i(columns - 1, rows - 1);
+	}
+
+	public void Add(int id, Box2 objectBounds)
+	{
+		var min = ToGrid(objectBounds.Min);
+		var max = ToGrid(objectBounds.Max);
+		for (int y = min.Y; y <= max.Y; ++y)
+		{
+			for (int x = min.X; x <= max.X; ++x)
+			{
+				grid.CreateOrReturn(x, y, () => []).Add(id);
+			}
+		}
+	}
+
+	public IEnumerable<int> FindCollisions(Box2 objectBounds, IReadOnlyList<Box2> boundsList)
+	{
+		var min = ToGrid(objectBounds.Min);
+		var max = ToGrid(objectBounds.Max);
+		HashSet<int> collider = [];
+		for (int y = min.Y; y <= max.Y; ++y)
+		{
+			for (int x = min.X; x <= max.X; ++x)
+			{
+				if (grid.Contains(x,y))
+				foreach (var id in grid[x, y])
+				{
+					collider.Add(id);
+				}
+			}
+		}
+		foreach (var id in collider)
+		{
+			var other = boundsList[id];
+			if(other.Overlaps(objectBounds))
+			{
+				yield return id;
+			}
+		}
 	}
 
 	public Vector2i ToGrid(Vector2 point)
@@ -29,14 +69,7 @@ internal sealed class SparseGridCollision : ICollisionAlgo
 		for (int id = 0; id < boundsList.Count; id++)
 		{
 			var bounds = boundsList[id];
-			var gridBounds = new Box2i(ToGrid(bounds.Min), ToGrid(bounds.Max));
-			for (int y = gridBounds.Min.Y; y <= gridBounds.Max.Y; ++y)
-			{
-				for (int x = gridBounds.Min.X; x <= gridBounds.Max.X; ++x)
-				{
-					grid.CreateOrReturn(x, y, () => []).Add(id);
-				}
-			}
+			Add(id, bounds);
 		}
 		var max = 0;
 		var sum = 0;

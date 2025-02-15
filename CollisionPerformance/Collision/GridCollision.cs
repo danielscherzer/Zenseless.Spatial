@@ -2,6 +2,7 @@
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using Zenseless.OpenTK;
 using Zenseless.Spatial;
 
 namespace Example.Collision;
@@ -15,6 +16,19 @@ internal sealed class GridCollision : ICollisionAlgo
 		grid.ForEach(() => []);
 	}
 
+	internal void Add(int id, Box2 objectBounds)
+	{
+		var min = ToGrid(objectBounds.Min);
+		var max = ToGrid(objectBounds.Max);
+		for (int y = min.Y; y <= max.Y; ++y)
+		{
+			for (int x = min.X; x <= max.X; ++x)
+			{
+				grid[x, y].Add(id);
+			}
+		}
+	}
+
 	public Vector2i ToGrid(Vector2 point)
 	{
 		var size = new Vector2(grid.Columns, grid.Rows);
@@ -25,6 +39,31 @@ internal sealed class GridCollision : ICollisionAlgo
 		return Vector2i.Clamp((Vector2i)p, Vector2i.Zero, cellMax);
 	}
 
+	public IEnumerable<int> FindCollisions(Box2 objectBounds, IReadOnlyList<Box2> boundsList)
+	{
+		var min = ToGrid(objectBounds.Min);
+		var max = ToGrid(objectBounds.Max);
+		HashSet<int> collider = [];
+		for (int y = min.Y; y <= max.Y; ++y)
+		{
+			for (int x = min.X; x <= max.X; ++x)
+			{
+				foreach (var id in grid[x, y])
+				{
+					collider.Add(id);
+				}
+			}
+		}
+		foreach (var id in collider)
+		{
+			var other = boundsList[id];
+			if (other.Overlaps(objectBounds))
+			{
+				yield return id;
+			}
+		}
+	}
+
 	public void FindCollisions(ICollection<int> colliding, IReadOnlyList<Box2> boundsList)
 	{
 		grid.ForEach(cell => cell.Clear());
@@ -32,27 +71,28 @@ internal sealed class GridCollision : ICollisionAlgo
 		// fill grid
 		for (int id = 0; id < boundsList.Count; id++)
 		{
-			var bounds = boundsList[id];
-			var gridBounds = new Box2i(ToGrid(bounds.Min), ToGrid(bounds.Max));
-			for (int y = gridBounds.Min.Y; y <= gridBounds.Max.Y; ++y)
+			var objectBounds = boundsList[id];
+			var min = ToGrid(objectBounds.Min);
+			var max = ToGrid(objectBounds.Max);
+			for (int y = min.Y; y <= max.Y; ++y)
 			{
-				for (int x = gridBounds.Min.X; x <= gridBounds.Max.X; ++x)
+				for (int x = min.X; x <= max.X; ++x)
 				{
 					grid[x, y].Add(id);
 				}
 			}
 		}
-		var max = 0;
+		var maximum = 0;
 		var sum = 0;
 		colliding.Clear();
 		grid.ForEach(cell =>
 		{
-			max = Math.Max(max, cell.Count);
+			maximum = Math.Max(maximum, cell.Count);
 			sum += cell.Count;
 			BruteForceCollision.AddCollisions(colliding, boundsList, cell);
 		});
 		ImGui.Text($"Cells:{grid.Cells.Length}");
-		ImGui.Text($"Entries per cell Max={max} Avg={sum / (float)grid.Cells.Length:F2}");
+		ImGui.Text($"Entries per cell Max={maximum} Avg={sum / (float)grid.Cells.Length:F2}");
 	}
 
 	public IReadOnlyGrid<List<int>> Grid => grid;

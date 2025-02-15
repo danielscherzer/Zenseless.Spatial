@@ -1,7 +1,9 @@
-﻿using Example.Core;
+﻿using Example.Collision;
+using Example.Core;
 using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Zenseless.Patterns;
 
 namespace Example;
@@ -41,9 +43,25 @@ internal sealed class GameObjects
 
 	private static void Add(List<GameObject> gameObjects, int count)
 	{
-		for (int i = 0; i < count; ++i)
+		var size = (int)MathF.Sqrt(gameObjects.Count + count);
+		GridCollision broadPhase = new(size, size);
+		var gos = gameObjects.Select(go => go.Bounds).ToList();
+		// fill grid
+		for (int id = 0; id < gos.Count; ++id)
 		{
-			gameObjects.Add(Create());
+			broadPhase.Add(id, gos[id]);
+		}
+		var newSize = gameObjects.Count + count;
+		while(gameObjects.Count < newSize)
+		{
+			var go = Create();
+			if (!broadPhase.FindCollisions(go.Bounds, gos).Any())
+			{
+				var id = gameObjects.Count;
+				gameObjects.Add(go);
+				gos.Add(go.Bounds);
+				broadPhase.Add(id, go.Bounds);
+			}
 		}
 	}
 
