@@ -22,8 +22,8 @@ public class SparseGrid<CellType> : IEnumerable<CellType>
 	/// <returns>contents of a cell</returns>
 	public CellType this[int column, int row]
 	{
-		get { return _cells[SparseGrid<CellType>.Id(column, row)]; }
-		set { _cells[SparseGrid<CellType>.Id(column, row)] = value; }
+		get { return _cells[Id(column, row)]; }
+		set { _cells[Id(column, row)] = value; }
 	}
 
 	/// <summary>
@@ -74,7 +74,7 @@ public class SparseGrid<CellType> : IEnumerable<CellType>
 	/// <returns></returns>
 	public CellType CreateOrReturn(int column, int row, Func<CellType> eval)
 	{
-		var id = SparseGrid<CellType>.Id(column, row);
+		var id = Id(column, row);
 		if (!_cells.TryGetValue(id, out var cell))
 		{
 			cell = eval();
