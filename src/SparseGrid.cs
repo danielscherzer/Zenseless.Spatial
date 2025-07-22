@@ -92,7 +92,8 @@ public class SparseGrid<CellType> : IEnumerable<CellType>
 	IEnumerator IEnumerable.GetEnumerator() => _cells.Values.GetEnumerator();
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private static int Id(int column, int row) => (int)Morton.Interleave((uint)column, (uint)row);
+	private static int Id(int column, int row) => (int)Morton.Interleave((uint)(column + Half), (uint)(row + Half));
 
 	private readonly Dictionary<int, CellType> _cells = new();
+	private const int Half = ushort.MaxValue / 2;
 }

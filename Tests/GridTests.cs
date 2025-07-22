@@ -11,16 +11,16 @@ public class GridTests
 	[TestMethod()]
 	public void EmptyGridTest()
 	{
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Grid<int>(0, 1));
-		Assert.ThrowsException<ArgumentOutOfRangeException>(() => new Grid<int>(1, 0));
+		Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new Grid<int>(0, 1));
+		Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new Grid<int>(1, 0));
 	}
 
 	[TestMethod()]
 	public void GridSizeTest()
 	{
 		Grid<int> grid = new(13, 17);
-		Assert.AreEqual(grid.AsReadOnly().Count, 13 * 17);
-		Assert.AreEqual(grid.AsReadOnly().Count, grid.Columns * grid.Rows);
+		Assert.AreEqual(13 * 17, grid.AsReadOnly().Count);
+		Assert.AreEqual(grid.Columns * grid.Rows, grid.AsReadOnly().Count);
 		grid[grid.Columns - 1, grid.Rows - 1] = 4;
 		Assert.AreEqual(4, grid.AsReadOnly().Last());
 	}
@@ -60,7 +60,7 @@ public class GridTests
 		grid.ForEach((col, row, value) => col + (row * grid.Columns));
 		for (int i = 0; i < grid.Cells.Length; ++i)
 		{
-			Assert.AreEqual(grid.Cells[i], i);
+			Assert.AreEqual(i, grid.Cells[i]);
 		}
 	}
 
@@ -83,13 +83,13 @@ public class GridTests
 	{
 		Grid<int> grid = new(2, 3)
 		{
-			Cells = new int[] { 1, 2, 3, 4, 5, 6 }
+			Cells = [1, 2, 3, 4, 5, 6]
 		};
 		for (int i = 0; i < grid.Cells.Length; ++i)
 		{
 			Assert.AreEqual(i + 1, grid.Cells[i]);
 		}
-		Assert.ThrowsException<ArgumentException>(() => grid.Cells = new int[] { 1, 2, 3 });
+		Assert.ThrowsExactly<ArgumentException>(() => _ = grid.Cells = new int[] { 1, 2, 3 });
 	}
 
 	[TestMethod()]
@@ -98,7 +98,7 @@ public class GridTests
 		Grid<int> grid = new(543, 127);
 		var arr = Enumerable.Repeat(45, grid.AsReadOnly().Count * 10).ToArray();
 		grid.CopyFrom(arr, grid.AsReadOnly().Count);
-		Assert.ThrowsException<ArgumentException>(() => grid.CopyFrom(arr, arr.Length));
+		Assert.ThrowsExactly<ArgumentException>(() => grid.CopyFrom(arr, arr.Length));
 		Assert.IsTrue(grid.AsReadOnly().All(value => 45 == value));
 		var arr2 = Enumerable.Repeat(67, 10).ToArray();
 		grid.CopyFrom(arr2, arr2.Length);
@@ -150,7 +150,7 @@ public class GridTests
 		Grid<int> grid = new(10, 3);
 		var id = grid.GetID(column, row);
 		var (actualColumn, actualRow) = grid.GetColRow(id);
-		Assert.AreEqual(actualColumn, column);
-		Assert.AreEqual(actualRow, row);
+		Assert.AreEqual(column, actualColumn);
+		Assert.AreEqual(row, actualRow);
 	}
 }
