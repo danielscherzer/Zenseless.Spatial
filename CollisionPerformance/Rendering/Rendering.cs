@@ -30,7 +30,7 @@ internal static class Rendering
 	public static void SetMaterial(Material material)
 	{
 		GL.Color4(material.Color);
-		GL.PolygonMode(MaterialFace.FrontAndBack, material.Filled ? PolygonMode.Fill : PolygonMode.Line);
+		GL.PolygonMode(TriangleFace.FrontAndBack, material.Filled ? PolygonMode.Fill : PolygonMode.Line);
 		if (material.Filled) GL.Enable(EnableCap.Blend); else GL.Disable(EnableCap.Blend);
 	}
 
@@ -56,6 +56,6 @@ internal static class Rendering
 		SetMaterial(broadPhaseVisual.Material);
 		Draw(PrimitiveType.Quads, broadPhaseVisual.CalcPoints());
 		GL.Color4(1f, 1f, 1f, 1f);
-		GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+		GL.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
 	}
 }
