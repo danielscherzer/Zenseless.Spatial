@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Zenseless.OpenTK.Gui" Version="0.1.25" />
+    <PackageReference Include="Zenseless.OpenTK.Gui" Version="0.1.42" />
   </ItemGroup>
 
   <ItemGroup>
